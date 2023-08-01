@@ -5,5 +5,5 @@ struct Tracker {
     let title: String
     let color: UIColor
     let emodji: String
-    let schedule: [Int]
+    let schedule: [String]
 }
