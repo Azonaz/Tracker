@@ -117,6 +117,13 @@ class TrackersViewController: UIViewController {
     
     @objc
     private func tapAddTrackerButton() {
+        let newHabitVC = NewHabitViewController()
+        newHabitVC.delegate = self
+        let newEventVC = NewEventViewController()
+        newEventVC.delegate = self
+        let trackerTypeVC = TrackerTypeViewController(newHabitVC: newHabitVC, newEventVC: newEventVC)
+        let monavigationController = UINavigationController(rootViewController: trackerTypeVC)
+        navigationController?.present(monavigationController, animated: true)
         
     }
     
@@ -198,6 +205,18 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
 
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        
+    }
+    
+    
+}
+
+extension TrackersViewController: NewHabitViewControllerDelegate, NewEventViewControllerDelegate {
+    func addNewHabit(_ trackerCategory: TrackerCategory) {
+        
+    }
+    
+    func addNewEvent(_ trackerCategory: TrackerCategory) {
         
     }
     
