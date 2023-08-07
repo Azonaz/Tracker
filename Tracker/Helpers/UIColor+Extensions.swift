@@ -11,22 +11,22 @@ extension UIColor {
 }
 
 extension UIColor {
-    static let ColorSelection1 = UIColor(named: "ColorSelection1")
-    static let ColorSelection2 = UIColor(named: "ColorSelection2")
-    static let ColorSelection3 = UIColor(named: "ColorSelection3")
-    static let ColorSelection4 = UIColor(named: "ColorSelection4")
-    static let ColorSelection5 = UIColor(named: "ColorSelection5")
-    static let ColorSelection6 = UIColor(named: "ColorSelection6")
-    static let ColorSelection7 = UIColor(named: "ColorSelection7")
-    static let ColorSelection8 = UIColor(named: "ColorSelection8")
-    static let ColorSelection9 = UIColor(named: "ColorSelection9")
-    static let ColorSelection10 = UIColor(named: "ColorSelection10")
-    static let ColorSelection11 = UIColor(named: "ColorSelection11")
-    static let ColorSelection12 = UIColor(named: "ColorSelection12")
-    static let ColorSelection13 = UIColor(named: "ColorSelection13")
-    static let ColorSelection14 = UIColor(named: "ColorSelection14")
-    static let ColorSelection15 = UIColor(named: "ColorSelection15")
-    static let ColorSelection16 = UIColor(named: "ColorSelection16")
-    static let ColorSelection17 = UIColor(named: "ColorSelection17")
-    static let ColorSelection18 = UIColor(named: "ColorSelection18")
+    static var colorSelection1: UIColor { UIColor(named: "ColorSelection1") ?? UIColor.red }
+    static var colorSelection2: UIColor { UIColor(named: "ColorSelection2") ?? UIColor.red }
+    static var colorSelection3: UIColor { UIColor(named: "ColorSelection3") ?? UIColor.red }
+    static var colorSelection4: UIColor { UIColor(named: "ColorSelection4") ?? UIColor.red }
+    static var colorSelection5: UIColor { UIColor(named: "ColorSelection5") ?? UIColor.red }
+    static var colorSelection6: UIColor { UIColor(named: "ColorSelection6") ?? UIColor.red }
+    static var colorSelection7: UIColor { UIColor(named: "ColorSelection7") ?? UIColor.red }
+    static var colorSelection8: UIColor { UIColor(named: "ColorSelection8") ?? UIColor.red }
+    static var colorSelection9: UIColor { UIColor(named: "ColorSelection9") ?? UIColor.red }
+    static var colorSelection10: UIColor { UIColor(named: "ColorSelection10") ?? UIColor.red }
+    static var colorSelection11: UIColor { UIColor(named: "ColorSelection11") ?? UIColor.red }
+    static var colorSelection12: UIColor { UIColor(named: "ColorSelection12") ?? UIColor.red }
+    static var colorSelection13: UIColor { UIColor(named: "ColorSelection13") ?? UIColor.red }
+    static var colorSelection14: UIColor { UIColor(named: "ColorSelection14") ?? UIColor.red }
+    static var colorSelection15: UIColor { UIColor(named: "ColorSelection15") ?? UIColor.red }
+    static var colorSelection16: UIColor { UIColor(named: "ColorSelection16") ?? UIColor.red }
+    static var colorSelection17: UIColor { UIColor(named: "ColorSelection17") ?? UIColor.red }
+    static var colorSelection18: UIColor { UIColor(named: "ColorSelection18") ?? UIColor.red }
 }

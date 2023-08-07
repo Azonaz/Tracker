@@ -9,20 +9,15 @@ final class NewHabitViewController: UIViewController {
     weak var delegate: NewHabitViewControllerDelegate?
     
     private var category: String?
-    private var schedule: [String] = []
-    private var newHabitTitle: String = ""
-    private var choosenSchedule: [String] = []
-    
-    private lazy var titleLabel: UILabel = {
-       let label = UILabel()
-        label.textColor = .ypBlack
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    //   private var schedule: [String] = []
+    // private var newHabitTitle: String = ""
+    private var choosenCategoryIndex: Int?
+    private var choosenSchedule: [Int] = []
+    //    private var categoryName: String = ""
+ //   private var schedule: [Weekday] = []
     
     private lazy var nameTextField: UITextField = {
-       let textField = UITextField()
+        let textField = UITextField()
         textField.backgroundColor = .ypBackground
         textField.textColor = .ypBlack
         textField.clearButtonMode = .whileEditing
@@ -32,42 +27,44 @@ final class NewHabitViewController: UIViewController {
         textField.attributedPlaceholder = NSAttributedString(string: "Введите название трекера", attributes: attribute)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
+        textField.delegate = self
         return textField
     }()
     
     private lazy var errorLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         label.textColor = .ypRed
         label.isHidden = true
         label.text = "Ограничение 38 символов"
+        //    label.textAlignment = .center
         return label
     }()
     
-    private lazy var searchStackView: UIStackView = {
-        let searchStack = UIStackView()
-        searchStack.axis = .vertical
-        searchStack.alignment = .center
-        searchStack.addArrangedSubview(nameTextField)
-        searchStack.addArrangedSubview(errorLabel)
-        searchStack.translatesAutoresizingMaskIntoConstraints = false
-        return searchStack
+    private lazy var textFieldStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.addArrangedSubview(nameTextField)
+        stackView.addArrangedSubview(errorLabel)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
     
     private lazy var habitTableView: UITableView = {
-       let tableView = UITableView()
-        tableView.backgroundColor = .ypWhite
+        let tableView = UITableView()
         tableView.layer.cornerRadius = 16
         tableView.separatorColor = .ypGray
         tableView.isScrollEnabled = false
-        tableView.register(NewHabitCell.self, forCellReuseIdentifier: NewHabitCell.reuseIdentifier)
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.register(NewHabitCell.self, forCellReuseIdentifier: NewHabitCell.reuseIdentifier)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
     
     private lazy var cancelButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.layer.cornerRadius = 16
         button.layer.borderWidth = 1
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -80,18 +77,18 @@ final class NewHabitViewController: UIViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton()
-         button.layer.cornerRadius = 16
+        button.layer.cornerRadius = 16
         button.backgroundColor = .ypGray
-         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-         button.setTitleColor(.ypWhite, for: .normal)
-         button.setTitle("Создать", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(.ypWhite, for: .normal)
+        button.setTitle("Создать", for: .normal)
         button.isEnabled = false
-         button.addTarget(self, action: #selector(tapCreateButton), for: .touchUpInside)
-         return button
-     }()
+        button.addTarget(self, action: #selector(tapCreateButton), for: .touchUpInside)
+        return button
+    }()
     
     private lazy var buttonStackView: UIStackView = {
-       let buttonStack = UIStackView()
+        let buttonStack = UIStackView()
         buttonStack.axis = .horizontal
         buttonStack.spacing = 8
         buttonStack.alignment = .fill
@@ -110,17 +107,14 @@ final class NewHabitViewController: UIViewController {
     
     private func activateConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 27),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.heightAnchor.constraint(equalToConstant: 22),
-            searchStackView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
-            searchStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            searchStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            nameTextField.leadingAnchor.constraint(equalTo: searchStackView.leadingAnchor),
-            nameTextField.trailingAnchor.constraint(equalTo: searchStackView.trailingAnchor),
+            textFieldStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            textFieldStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            textFieldStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
+            nameTextField.leadingAnchor.constraint(equalTo: textFieldStackView.leadingAnchor),
+            nameTextField.trailingAnchor.constraint(equalTo: textFieldStackView.trailingAnchor),
             errorLabel.heightAnchor.constraint(equalToConstant: 38),
-            habitTableView.topAnchor.constraint(equalTo: searchStackView.bottomAnchor, constant: 24),
+            habitTableView.topAnchor.constraint(equalTo: textFieldStackView.bottomAnchor, constant: 24),
             habitTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             habitTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             habitTableView.heightAnchor.constraint(equalToConstant: 150),
@@ -133,8 +127,10 @@ final class NewHabitViewController: UIViewController {
     
     private func createView() {
         view.backgroundColor = .ypWhite
-        view.addSubview(titleLabel)
-        view.addSubview(searchStackView)
+        navigationItem.title = "Новая привычка"
+        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.ypBlack as Any]
+        navigationItem.hidesBackButton = true
+        view.addSubview(textFieldStackView)
         view.addSubview(habitTableView)
         view.addSubview(buttonStackView)
         activateConstraints()
@@ -163,9 +159,15 @@ final class NewHabitViewController: UIViewController {
         let text = nameTextField.text ?? ""
         let category = category ?? ""
         if let delegate = delegate {
-            delegate.addNewHabit(TrackerCategory(title: category, trackers: [Tracker(id: UUID(), title: text, color: .ColorSelection1 ?? .red, emodji: emodjies[3], schedule: choosenSchedule)]))
+            delegate.addNewHabit(TrackerCategory(
+                title: category,
+                trackers: [Tracker(id: UUID(),
+                                   title: text,
+                                   color: .colorSelection1,
+                                   emodji: "😉",
+                                   schedule: choosenSchedule)]))
         }
-    dismiss(animated: true)
+        dismiss(animated: true)
     }
 }
 
@@ -177,10 +179,12 @@ extension NewHabitViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch indexPath.row {
         case 0:
-            let viewController = CategoryViewController()
+            let viewController = CategoryViewController(selectIndex: choosenCategoryIndex)
+            viewController.delegate = self
             navigationController?.pushViewController(viewController, animated: true)
         case 1:
-            let viewController = ScheduleViewController()
+            let viewController = ScheduleViewController(choosenDay: choosenSchedule)
+            viewController.delegate = self
             navigationController?.pushViewController(viewController, animated: true)
         default:
             break
@@ -193,9 +197,10 @@ extension NewHabitViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
-    // swiftlint:disable force_cast
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: NewHabitCell.reuseIdentifier, for: indexPath) as! NewHabitCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: NewHabitCell.reuseIdentifier,
+                                                       for: indexPath) as? NewHabitCell else { return UITableViewCell()}
         cell.backgroundColor = .ypBackground
         switch indexPath.row {
         case 0:
@@ -205,53 +210,76 @@ extension NewHabitViewController: UITableViewDataSource {
         default:
             break
         }
-        return cell
-    }
-    // swiftlint:disable force_cast
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let numberOfRows = tableView.numberOfRows(inSection: 0)
-        
-        if indexPath.row == 0 {
-            cell.layer.cornerRadius = 16
-            cell.clipsToBounds = true
-            cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        } else if indexPath.row == numberOfRows - 1 {
-            cell.layer.cornerRadius = 16
-            cell.clipsToBounds = true
-            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        let lastRow = tableView.numberOfRows(inSection: indexPath.section) - 1
+        if indexPath.row == lastRow {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: cell.bounds.size.width)
         }
+        return cell
     }
 }
 
 extension NewHabitViewController: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let maxStringLength = 38
-        let currentString = (textField.text ?? "") as NSString
-        let newString = currentString.replacingCharacters(in: range, with: string)
-        if newString.count > maxStringLength {
-            showErrorLabel()
-        } else {
-            hideErrorLabel()
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+        guard let text = textField.text, !text.isEmpty else {
+            return true
         }
-        return newString.count <= maxStringLength
+        let newTextLength = text.count + string.count - range.length
+        errorLabel.isHidden = (newTextLength <= 38)
+        if newTextLength >= 1 {
+            createButton.isEnabled = true
+            createButton.backgroundColor = UIColor.ypBlack
+        } else {
+            createButton.isEnabled = false
+            createButton.backgroundColor = UIColor.gray
+        }
+        return newTextLength <= 38
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        checkCreateButton()
         textField.resignFirstResponder()
-        newHabitTitle = textField.text ?? ""
-        hideErrorLabel()
         return true
     }
     
-    private func showErrorLabel() {
-        guard errorLabel.isHidden else { return }
-        self.errorLabel.isHidden = false
-        self.searchStackView.layoutIfNeeded()
+}
+
+extension NewHabitViewController: CategoryViewControllerDelegate {
+    func addCategory(_ category: String, index: Int) {
+        let indexPath = IndexPath(row: 0, section: 0)
+        if let cell = habitTableView.cellForRow(at: indexPath) as? NewHabitCell {
+            cell.detailTextLabel?.text = category
+        }
+        self.category = category
+        choosenCategoryIndex = index
+        checkCreateButton()
     }
     
-    private func hideErrorLabel() {
-        guard !errorLabel.isHidden else { return }
-        self.errorLabel.isHidden = true
-        self.searchStackView.layoutIfNeeded()
+}
+
+extension NewHabitViewController: ScheduleViewControllerDelegate {
+    func addWeekdays(_ weekdays: [Int]) {
+        choosenSchedule = weekdays
+        var selectDaysView = ""
+        if weekdays.count == 7 {
+            selectDaysView = "Каждый день"
+        } else {
+            for index in choosenSchedule {
+                var calendar = Calendar.current
+                calendar.locale = Locale(identifier: "ru_RU")
+                let day = calendar.shortWeekdaySymbols[index]
+                selectDaysView.append(day)
+                selectDaysView.append(", ")
+            }
+            selectDaysView = String(selectDaysView.dropLast(2))
+        }
+        let indexPath = IndexPath(row: 1, section: 0)
+        if let cell = habitTableView.cellForRow(at: indexPath) as? NewHabitCell {
+            cell.detailTextLabel?.text = selectDaysView
+        }
+        checkCreateButton()
     }
+    
+    
 }

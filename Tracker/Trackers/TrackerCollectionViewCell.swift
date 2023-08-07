@@ -1,11 +1,12 @@
 import UIKit
 protocol TrackerCollectionViewCellDelegate: AnyObject {
-    
+    func dayCheckButtonTapped(viewModel: TrackerCellView)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
-    static let reuseIdentifier = "cellTrackerCollection"
+    static let reuseIdentifier = "CellTrackerCollection"
     weak var delegate: TrackerCollectionViewCellDelegate?
+    private var cardModel: TrackerCellView?
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -65,6 +66,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configCell(viewModel: TrackerCellView) {
+        titleLabel.text = viewModel.tracker.title
+        emodjiLabel.text = viewModel.tracker.emodji
+        quantityLabel.text = "\(viewModel.dayCounter) \(days)"
+        colorView.backgroundColor = viewModel.tracker.color
+        self.cardModel = viewModel
+        dayCheckButtonState()
+        dayCheckButtonIsEnabled()
+        
+        
+    }
+    
     private func activateConstraints() {
         NSLayoutConstraint.activate([
             colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -96,11 +109,46 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(quantityButton)
         contentView.addSubview(quantityLabel)
         activateConstraints()
+        dayCheckButtonState()
+        addViews()
     }
     
     @objc
-    private func tapQuantityButton() {
+    private func tapQuantityButton(_ sender: UIButton) {
+        cardModel?.buttonIsChecked.toggle()
         
+        guard let cardModel = cardModel else { return }
+        delegate?.dayCheckButtonTapped(viewModel: cardModel)
+    }
+    
+    func dayCheckButtonState() {
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 10, weight: .bold)
+        var symbolImage: UIImage?
+        guard let cardModel = cardModel else { return }
+        if cardModel.buttonIsChecked {
+            symbolImage = .checkImage
+            quantityButton.layer.opacity = 0.3
+        } else {
+            symbolImage = .plusTracker
+            quantityButton.layer.opacity = 1.0
+        }
+        quantityButton.setImage(symbolImage, for: .normal)
+    }
+    
+    func dayCheckButtonIsEnabled() {
+        guard let cardModel = cardModel,
+              let selectDate = TrackersViewController.selectDay else { return }
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let isButtonEnabled = calendar.compare(currentDate, to: selectDate, toGranularity: .day) != .orderedAscending
+        
+        if cardModel.buttonIsEnable && isButtonEnabled {
+            quantityButton.isEnabled = true
+            quantityButton.backgroundColor = cardModel.tracker.color.withAlphaComponent(1)
+        } else {
+            quantityButton.isEnabled = false
+            quantityButton.backgroundColor = cardModel.tracker.color.withAlphaComponent(0.3)
+        }
     }
     
     private func addQuantityLabelText() {

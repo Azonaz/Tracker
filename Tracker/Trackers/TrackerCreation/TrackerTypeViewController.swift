@@ -5,15 +5,6 @@ final class TrackerTypeViewController: UIViewController {
     private var newHabitVC: UIViewController?
     private var newEventVC: UIViewController?
     
-    private lazy var titleLabel: UILabel = {
-       let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .ypBlack
-        label.text = "Создание трекера"
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private lazy var habitButton: UIButton = {
        let button = UIButton()
         button.backgroundColor = .ypBlack
@@ -65,9 +56,6 @@ final class TrackerTypeViewController: UIViewController {
     
     private func activateConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 27),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.heightAnchor.constraint(equalToConstant: 22),
             buttonsStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 31.5),
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
@@ -76,9 +64,9 @@ final class TrackerTypeViewController: UIViewController {
     }
     
     private func createView() {
-        navigationController?.isNavigationBarHidden = true
+        navigationItem.title = "Создание трекера"
+        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.ypBlack as Any]
         view.backgroundColor = .ypWhite
-        view.addSubview(titleLabel)
         view.addSubview(buttonsStackView)
         activateConstraints()
     }
