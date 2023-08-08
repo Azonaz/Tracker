@@ -2,20 +2,27 @@ import UIKit
 
 final class CategoryCell: UITableViewCell {
     static let reuseIdentifier = "CategoryCell"
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        createCell()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func createCell() {
+
+    func configure(with title: String, isFirstRow: Bool, isLastRow: Bool, isSelected: Bool) {
+        textLabel?.text = title
         textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack
-        layoutMargins = .zero
-        separatorInset = .zero
+        backgroundColor = .ypBackground
+        layer.masksToBounds = true
+        layer.cornerRadius = 16
+        selectionStyle = .none
+        accessoryType = isSelected ? .checkmark : .none
+        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        if isFirstRow && isLastRow {
+            layer.cornerRadius = 16
+            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
+        } else if isFirstRow {
+            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        } else if isLastRow {
+            layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
+        } else {
+            layer.cornerRadius = 0
+        }
     }
-}  
+}

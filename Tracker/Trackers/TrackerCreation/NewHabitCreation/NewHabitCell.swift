@@ -2,35 +2,34 @@ import UIKit
 
 final class NewHabitCell: UITableViewCell {
     static let reuseIdentifier = "NewHabitCell"
-    
-    private lazy var chevronImageView: UIImageView = {
-       let imageView = UIImageView()
-        imageView.image = .chevron
-        imageView.tintColor = .ypGray
-        imageView.contentMode = .center
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
-        createCell()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    private func createCell() {
+
+    func configure(with title: String, categorySubtitle: String, scheduleSubtitle: String, isFirstRow: Bool) {
+        textLabel?.text = title
         textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack
+        detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         detailTextLabel?.textColor = .ypGray
-        layoutMargins = .zero
-        separatorInset = .zero
-        contentView.addSubview(chevronImageView)
-        NSLayoutConstraint.activate([
-            chevronImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            chevronImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
-        ])
+        backgroundColor = .ypBackground
+        layer.masksToBounds = true
+        layer.cornerRadius = 16
+        selectionStyle = .none
+        accessoryType = .disclosureIndicator
+        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        if isFirstRow {
+            detailTextLabel?.text = categorySubtitle
+            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        } else {
+            detailTextLabel?.text = scheduleSubtitle
+            layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
+        }
     }
 }

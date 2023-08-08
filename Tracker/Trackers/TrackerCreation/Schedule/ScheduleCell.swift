@@ -1,50 +1,31 @@
 import UIKit
 
-protocol ScheduleCellDelegate: AnyObject {
-    func changeSwitch (_ cell: ScheduleCell, isOn: Bool)
-}
-
 class ScheduleCell: UITableViewCell {
-    
     static let reuseIdentifier = "ScheduleCell"
-    weak var delegate: ScheduleCellDelegate?
 
-    
-    lazy var switchDay: UISwitch = {
-        let switchDay = UISwitch()
-        switchDay.tintColor = .ypWhite
-        switchDay.onTintColor = .ypBlue
-        switchDay.translatesAutoresizingMaskIntoConstraints = false
-        return switchDay
-    } ()
-    
-  
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        createView()
-        selectionStyle = .none
-        switchDay.addTarget(self, action: #selector(changeSwitch), for: .valueChanged)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
-    private func createView() {
+    let switchWeekday: UISwitch = {
+        let button = UISwitch()
+        button.onTintColor = .ypBlue
+        return button
+    }()
+
+    func configure( with title: String, isFirstRow: Bool, isLastRow: Bool) {
+        textLabel?.text = title
         textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack
-        contentView.addSubview(switchDay)
-        NSLayoutConstraint.activate([
-            switchDay.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            switchDay.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
-        ])
+        backgroundColor = .ypBackground
+        layer.cornerRadius = 16
+        layer.masksToBounds = true
+        selectionStyle = .none
+        accessoryView = switchWeekday
+        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        if isFirstRow {
+            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        } else if isLastRow {
+            layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
+        } else {
+            layer.cornerRadius = 0
+        }
     }
-    
-    @objc private func changeSwitch(_ sender: UISwitch) {
-        delegate?.changeSwitch(self, isOn: sender.isOn)
-    }
-   
 }
-    
-
