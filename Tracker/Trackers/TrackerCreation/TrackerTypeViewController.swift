@@ -62,7 +62,7 @@ final class TrackerTypeViewController: UIViewController {
 
     @objc
     private func tapHabitButton() {
-        let habitViewController = NewHabitViewController()
+        let habitViewController = NewHabitViewController(isHabit: true)
         habitViewController.delegate = delegate
         let navigationController = UINavigationController(rootViewController: habitViewController)
         present(navigationController, animated: true)
@@ -70,7 +70,7 @@ final class TrackerTypeViewController: UIViewController {
 
     @objc
     private func tapEventButton() {
-        let eventViewController = NewEventViewController()
+        let eventViewController = NewHabitViewController(isHabit: false)
         eventViewController.delegate = delegate
         let navigationController = UINavigationController(rootViewController: eventViewController)
         present(navigationController, animated: true)

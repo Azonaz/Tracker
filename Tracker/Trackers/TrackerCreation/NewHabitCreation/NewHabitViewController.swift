@@ -6,13 +6,22 @@ protocol UpdateSubtitleDelegate: AnyObject {
 }
 
 final class NewHabitViewController: UIViewController {
+
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
     private let mockData = MockData.shared
-    private let titleCells = ["Категория", "Расписание"]
+    private var tableTitles: [String] = []
+    private var isHabit: Bool
+    private lazy var titleCells: [String] = {
+        isHabit ? ["Категория", "Расписание"] : ["Категория"]
+    }()
+ //   private var tableHeight: CGFloat = 0
+  //  let trackerType: TrackerType
     private var trackerTitle: String = ""
     private var categorySubtitle: String = ""
-    private var scheduleSubtitle: [Weekday] = []
+    private lazy var scheduleSubtitle: [Weekday] = {
+        isHabit ? [] : Weekday.allCases
+    }()
     private var selectedWeekdays: [Int: Bool] = [:]
     private var tableViewDataSource: NewHabbitViewDataSource?
     private var tableViewDelegate: NewHabbitViewDelegate?
@@ -98,6 +107,15 @@ final class NewHabitViewController: UIViewController {
         return buttonStack
     }()
 
+    init(isHabit: Bool) {
+        self.isHabit = isHabit
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableViewDataSource = NewHabbitViewDataSource(viewController: self)
@@ -117,7 +135,7 @@ final class NewHabitViewController: UIViewController {
             habitTableView.topAnchor.constraint(equalTo: textFieldStackView.bottomAnchor, constant: 24),
             habitTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             habitTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-           habitTableView.heightAnchor.constraint(equalToConstant: 150),
+            habitTableView.heightAnchor.constraint(equalToConstant: isHabit ? 150 : 75),
             buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             buttonStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             buttonStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
@@ -127,7 +145,7 @@ final class NewHabitViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Новая привычка"
+        navigationItem.title = isHabit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true

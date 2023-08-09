@@ -21,6 +21,7 @@ final class NewHabbitViewDelegate: NSObject & UITableViewDelegate {
             scheduleViewController.selectedWeekdays = viewController.getSelectedWeekdays()
             presentViewController(for: scheduleViewController)
         }
+  //      dissmis(animated: true)
     }
 
     private func presentViewController(for viewController: UIViewController) {
