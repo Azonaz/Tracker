@@ -1,6 +1,6 @@
 import UIKit
 
-final class TrackerCollectionViewDataSourse: NSObject & UICollectionViewDataSource {
+final class TrackerCollectionViewDataSourse: NSObject, UICollectionViewDataSource {
     private weak var viewController: TrackersViewController?
 
     init(viewController: TrackersViewController) {
@@ -20,8 +20,8 @@ final class TrackerCollectionViewDataSourse: NSObject & UICollectionViewDataSour
         guard
             let tracker = cellData?[indexPath.section].trackers[indexPath.row],
             let trackerCell = cell as? TrackerCollectionViewCell,
-            let isCompletedToday = viewController?.isTrackerCompletedToday(id: tracker.id),
-            let completedDays = viewController?.getCompletedTrackers().filter({
+            let isCompletedToday = viewController?.isTrackerDoneToday(id: tracker.id),
+            let completedDays = viewController?.getDoneTrackers().filter({
                 $0.id == tracker.id
             }).count
         else {
@@ -45,9 +45,7 @@ final class TrackerCollectionViewDataSourse: NSObject & UICollectionViewDataSour
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier:
                                                                     SupplementaryView.reuseIdentifier, for: indexPath)
         guard let headerView = view as? SupplementaryView, let categoryTitle = headerData?[indexPath.section].title
-        else {
-            return UICollectionReusableView()
-        }
+        else { return UICollectionReusableView() }
         headerView.configure(from: categoryTitle)
         return headerView
     }

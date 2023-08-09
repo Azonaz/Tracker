@@ -1,9 +1,9 @@
 import UIKit
 
-final class NewHabbitViewDelegate: NSObject & UITableViewDelegate {
-    private weak var viewController: NewHabitViewController?
+final class NewTrackerDelegate: NSObject, UITableViewDelegate {
+    private weak var viewController: CreateNewTrackerViewController?
 
-    init(viewController: NewHabitViewController) {
+    init(viewController: CreateNewTrackerViewController) {
         self.viewController = viewController
     }
 
@@ -21,7 +21,6 @@ final class NewHabbitViewDelegate: NSObject & UITableViewDelegate {
             scheduleViewController.selectedWeekdays = viewController.getSelectedWeekdays()
             presentViewController(for: scheduleViewController)
         }
-  //      dissmis(animated: true)
     }
 
     private func presentViewController(for viewController: UIViewController) {

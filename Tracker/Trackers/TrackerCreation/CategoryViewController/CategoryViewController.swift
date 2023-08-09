@@ -1,10 +1,10 @@
 import UIKit
 
 final class CategoryViewController: UIViewController {
-    weak var delegate: UpdateSubtitleDelegate?
+    weak var delegate: UpdateCellSubtitleDelegate?
     var selectedIndexPath: IndexPath?
     private let mockData = MockData.shared
-    private var listOfCategories: [TrackerCategory] = []
+    private var categoriesList: [TrackerCategory] = []
     private var categoryTitle: String = ""
     private var tableViewDelegate: CategoryViewDelegate?
     private var tableViewDataSource: CategoryViewDataSource?
@@ -45,7 +45,7 @@ final class CategoryViewController: UIViewController {
         tableViewDataSource = CategoryViewDataSource(viewController: self)
         tableViewDelegate = CategoryViewDelegate(viewController: self)
         createView()
-        checkCategories()
+        checkPlaceholder()
     }
 
     private func activateConstraints() {
@@ -76,11 +76,11 @@ final class CategoryViewController: UIViewController {
     }
 
     private func getCategories() {
-        listOfCategories = mockData.categories
+        categoriesList = mockData.categories
     }
 
-    private func checkCategories() {
-        if listOfCategories.isEmpty {
+    private func checkPlaceholder() {
+        if categoriesList.isEmpty {
             placeholderView.isHidden = false
             tableView.isHidden = true
         } else {
@@ -89,8 +89,8 @@ final class CategoryViewController: UIViewController {
         }
     }
 
-    func getListOfCategories() -> [TrackerCategory] {
-        listOfCategories
+    func getCategoriesList() -> [TrackerCategory] {
+        categoriesList
     }
 
     func getCategoryTitle(_ title: String) -> String {
@@ -100,6 +100,19 @@ final class CategoryViewController: UIViewController {
 
     @objc
     func tapAddButton() {
-        dismiss(animated: true)
+        let newCategoryViewController = NewCategoryViewController()
+        newCategoryViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: newCategoryViewController)
+        present(navigationController, animated: true)
+    }
+}
+
+extension CategoryViewController: NewCategoryViewControllerDelegate {
+
+    func updateCategoriesList(with category: TrackerCategory) {
+        categoriesList.append(category)
+        mockData.update(categories: [category])
+        checkPlaceholder()
+        tableView.reloadData()
     }
 }

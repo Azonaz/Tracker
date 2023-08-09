@@ -5,7 +5,7 @@ class TrackersViewController: UIViewController {
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var doneTrackers: [TrackerRecord] = []
-    private var currentDay: Date?
+    private var currentDate: Date?
     private var delegate: TrackerCollectionViewDelegate?
     private var dataSourсe: TrackerCollectionViewDataSourse?
 
@@ -29,17 +29,11 @@ class TrackersViewController: UIViewController {
         return button
     }()
 
-    private lazy var searchTextBar: TrackerSearchBar = {
-        let searchText = TrackerSearchBar()
+    private lazy var searchTextBar: TrackerSearchTextBar = {
+        let searchText = TrackerSearchTextBar()
         searchText.delegate = self
         searchText.searchTextField.addTarget(self, action: #selector(tapSearchTextBar), for: .editingDidEndOnExit)
         return searchText
-    }()
-
-    private lazy var tapGesture: UITapGestureRecognizer = {
-        let recognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        recognizer.cancelsTouchesInView = false
-        return recognizer
     }()
 
     private lazy var collectionView: UICollectionView = {
@@ -77,8 +71,10 @@ class TrackersViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tapGesture)
         createNavigationBar()
-        createSearchTrackersTextField()
+        createSearchTextField()
         createTrackersCollectionView()
         createPlaceholderView(placeholderView)
     }
@@ -96,9 +92,8 @@ class TrackersViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
     }
 
-    private func createSearchTrackersTextField() {
+    private func createSearchTextField() {
         view.addSubview(searchTextBar)
-        view.addGestureRecognizer(tapGesture)
         NSLayoutConstraint.activate([
             searchTextBar.heightAnchor.constraint(equalToConstant: 36),
             searchTextBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -122,7 +117,7 @@ class TrackersViewController: UIViewController {
                                 withReuseIdentifier: SupplementaryView.reuseIdentifier)
     }
 
-    func createPlaceholderView(_ placeholder: UIView) {
+    private func createPlaceholderView(_ placeholder: UIView) {
         view.addSubview(placeholder)
         NSLayoutConstraint.activate([
             placeholder.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -130,7 +125,7 @@ class TrackersViewController: UIViewController {
         ])
     }
 
-    private func updatePlaceholderViews() {
+    private func updatePlaceholder() {
         if !categories.isEmpty && visibleCategories.isEmpty {
             createPlaceholderView(notFoundedPlaceholderView)
             placeholderView.isHidden = true
@@ -146,9 +141,9 @@ class TrackersViewController: UIViewController {
     }
 
     private func filterCategories() -> [TrackerCategory] {
-        currentDay = datePicker.date
+        currentDate = datePicker.date
         let calendar = Calendar.current
-        let filterWeekday = calendar.component(.weekday, from: currentDay ?? Date())
+        let filterWeekday = calendar.component(.weekday, from: currentDate ?? Date())
         let filterText = (searchTextBar.searchTextField.text ?? "").lowercased()
         return categories.compactMap { category in
             let trackers = category.trackers.filter { tracker in
@@ -167,7 +162,7 @@ class TrackersViewController: UIViewController {
 
     private func reloadVisibleCategories() {
         visibleCategories = filterCategories()
-        updatePlaceholderViews()
+        updatePlaceholder()
         collectionView.reloadData()
     }
 
@@ -175,7 +170,7 @@ class TrackersViewController: UIViewController {
         visibleCategories
     }
 
-    func getCompletedTrackers() -> [TrackerRecord] {
+    func getDoneTrackers() -> [TrackerRecord] {
         doneTrackers
     }
 
@@ -193,13 +188,14 @@ class TrackersViewController: UIViewController {
     }
 
     @objc
-    private func dismissKeyboard() {
-        view.endEditing(true)
+    private func tapSearchTextBar() {
+        reloadVisibleCategories()
+        searchTextBar.searchTextField.resignFirstResponder()
     }
 
     @objc
-    private func tapSearchTextBar() {
-        reloadVisibleCategories()
+    private func handleTap() {
+        view.endEditing(true)
     }
 }
 
@@ -219,11 +215,6 @@ extension TrackersViewController: UISearchBarDelegate {
         reloadVisibleCategories()
         searchBar.setShowsCancelButton(false, animated: true)
     }
-
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        reloadVisibleCategories()
-        searchBar.resignFirstResponder()
-    }
 }
 
 extension TrackersViewController: UICollectionViewDelegate {
@@ -233,8 +224,8 @@ extension TrackersViewController: UICollectionViewDelegate {
 extension TrackersViewController: TrackerCollectionViewCellDelegate {
 
     func getSelectedDate() -> Date? {
-        currentDay = datePicker.date
-        return currentDay
+        currentDate = datePicker.date
+        return currentDate
     }
 
     func updateTrackers() {
@@ -242,29 +233,29 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         collectionView.reloadData()
     }
 
-    func completeTracker(id: UUID, at indexPath: IndexPath) {
-        currentDay = datePicker.date
-        let trackerRecord = TrackerRecord(id: id, date: currentDay ?? Date())
+    func doneTracker(id: UUID, at indexPath: IndexPath) {
+        currentDate = datePicker.date
+        let trackerRecord = TrackerRecord(id: id, date: currentDate ?? Date())
         doneTrackers.append(trackerRecord)
         collectionView.reloadItems(at: [indexPath])
     }
 
-    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+    func undoneTracker(id: UUID, at indexPath: IndexPath) {
         doneTrackers.removeAll { trackerRecord in
             isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
         }
         collectionView.reloadItems(at: [indexPath])
     }
 
-    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
-        currentDay = datePicker.date
-        let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: currentDay ?? Date())
-        return trackerRecord.id == id && isSameDay
-    }
-
-    func isTrackerCompletedToday(id: UUID) -> Bool {
+    func isTrackerDoneToday(id: UUID) -> Bool {
         doneTrackers.contains { trackerRecord in
             isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
         }
+    }
+
+    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
+        currentDate = datePicker.date
+        let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: currentDate ?? Date())
+        return trackerRecord.id == id && isSameDay
     }
 }

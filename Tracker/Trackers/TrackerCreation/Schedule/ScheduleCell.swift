@@ -9,7 +9,7 @@ class ScheduleCell: UITableViewCell {
         return button
     }()
 
-    func configure( with title: String, isFirstRow: Bool, isLastRow: Bool) {
+    func configure(with title: String, isFirstRow: Bool, isLastRow: Bool) {
         textLabel?.text = title
         textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack

@@ -1,6 +1,6 @@
 import UIKit
 
-final class NewHabitCell: UITableViewCell {
+final class NewTrackerSubtitleCell: UITableViewCell {
     static let reuseIdentifier = "NewHabitCell"
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -31,19 +31,5 @@ final class NewHabitCell: UITableViewCell {
             layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
             separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
         }
-    }
-
-    func configureEvent(with title: String, categorySubtitle: String) {
-        textLabel?.text = title
-        textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        textLabel?.textColor = .ypBlack
-        detailTextLabel?.text = categorySubtitle
-        detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        detailTextLabel?.textColor = .ypGray
-        backgroundColor = .ypBackground
-        layer.masksToBounds = true
-        layer.cornerRadius = 16
-        selectionStyle = .none
-        accessoryType = .disclosureIndicator
     }
 }

@@ -1,7 +1,7 @@
 import UIKit
 
 final class ScheduleViewController: UIViewController {
-    weak var delegate: UpdateSubtitleDelegate?
+    weak var delegate: UpdateCellSubtitleDelegate?
     var schedule: [Weekday] = []
     var selectedWeekdays: [Int: Bool] = [:]
     private var dayList: [Weekday] = Weekday.allCases

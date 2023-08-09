@@ -1,6 +1,6 @@
 import Foundation
 
-struct GeometricParams {
+struct GeometricParameters {
     let cellCount: Int
     let leftInset: CGFloat
     let rightInset: CGFloat

@@ -1,9 +1,10 @@
 import UIKit
+
 protocol TrackerCollectionViewCellDelegate: AnyObject {
     func getSelectedDate() -> Date?
     func updateTrackers()
-    func completeTracker(id: UUID, at indexPath: IndexPath)
-    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
+    func doneTracker(id: UUID, at indexPath: IndexPath)
+    func undoneTracker(id: UUID, at indexPath: IndexPath)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
@@ -15,7 +16,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var indexPath: IndexPath?
 
     private lazy var trackerView: UIView = {
-    let view = UIView()
+        let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -49,8 +50,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return stack
     }()
 
-    private lazy var quantityDayLabel: UILabel = {
-       let label = UILabel()
+    private lazy var countDayLabel: UILabel = {
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -69,11 +70,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return image
     }()
 
-    private lazy var quantityDayButton: UIButton = {
+    private lazy var countDayButton: UIButton = {
         let button = UIButton(type: .system)
         button.layer.cornerRadius = 16
         button.tintColor = .ypWhite
-        button.addTarget(self, action: #selector(tapQuantityButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(tapCountDayButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -83,24 +84,24 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         self.trackerId = tracker.id
         self.indexPath = indexPath
         let color = tracker.color
-        addSubviews()
+        createSubviews()
         trackerView.backgroundColor = color
-        quantityDayButton.backgroundColor = color
+        countDayButton.backgroundColor = color
         titleLabel.text = tracker.title
         emodjiLabel.text = tracker.emodji
         let daysText = getDaysText(completedDays)
-        quantityDayLabel.text = daysText
-        checkCompletedToday()
+        countDayLabel.text = daysText
+        checkDoneToday()
         checkDate()
     }
 
-    private func addSubviews() {
+    private func createSubviews() {
         addTrackerView()
         addStackView()
         addEmojiLabel()
         addTrackerTitleLabel()
         addCounterDayLabel()
-        addAppendDayButton()
+        addCountDayButton()
     }
 
     private func addTrackerView() {
@@ -142,15 +143,15 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     private func addCounterDayLabel() {
-        stackView.addArrangedSubview(quantityDayLabel)
+        stackView.addArrangedSubview(countDayLabel)
     }
 
-   private func addAppendDayButton() {
-        stackView.addArrangedSubview(quantityDayButton)
+    private func addCountDayButton() {
+        stackView.addArrangedSubview(countDayButton)
         NSLayoutConstraint.activate([
-            quantityDayButton.widthAnchor.constraint(equalToConstant: 34),
-            quantityDayButton.heightAnchor.constraint(equalToConstant: 34),
-            quantityDayButton.topAnchor.constraint(equalTo: stackView.topAnchor, constant: 8)
+            countDayButton.widthAnchor.constraint(equalToConstant: 34),
+            countDayButton.heightAnchor.constraint(equalToConstant: 34),
+            countDayButton.topAnchor.constraint(equalTo: stackView.topAnchor, constant: 8)
         ])
     }
 
@@ -170,28 +171,28 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
 
-    private func checkCompletedToday() {
+    private func checkDoneToday() {
         let opacity: Float = isCompletedToday ? 0.3 : 1.0
         let image = isCompletedToday ? doneImage : plusImage
-        quantityDayButton.setImage(image, for: .normal)
-        quantityDayButton.layer.opacity = opacity
+        countDayButton.setImage(image, for: .normal)
+        countDayButton.layer.opacity = opacity
     }
 
     private func checkDate() {
         let selectedDate = delegate?.getSelectedDate() ?? Date()
-        quantityDayButton.isEnabled = selectedDate <= currentDate ?? Date()
+        countDayButton.isEnabled = selectedDate <= currentDate ?? Date()
     }
 
     @objc
-    private func tapQuantityButton() {
+    private func tapCountDayButton() {
         guard let trackerId, let indexPath else {
             assert(false, "ID not found")
             return
         }
         if isCompletedToday {
-            delegate?.uncompleteTracker(id: trackerId, at: indexPath)
+            delegate?.undoneTracker(id: trackerId, at: indexPath)
         } else {
-            delegate?.completeTracker(id: trackerId, at: indexPath)
+            delegate?.doneTracker(id: trackerId, at: indexPath)
         }
     }
 }

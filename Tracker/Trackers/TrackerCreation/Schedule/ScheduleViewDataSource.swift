@@ -1,6 +1,6 @@
 import UIKit
 
-final class ScheduleViewDataSource: NSObject & UITableViewDataSource {
+final class ScheduleViewDataSource: NSObject, UITableViewDataSource {
     private weak var viewController: ScheduleViewController?
 
     init(viewController: ScheduleViewController) {
@@ -17,7 +17,9 @@ final class ScheduleViewDataSource: NSObject & UITableViewDataSource {
         let title = viewController.getWeekdays()[indexPath.row].rawValue
         let isFirstRow = indexPath.row == 0
         let isLastRow = indexPath.row == viewController.getWeekdays().count - 1
-        weekdayCell.configure(with: title, isFirstRow: isFirstRow, isLastRow: isLastRow)
+        weekdayCell.configure(with: title,
+                              isFirstRow: isFirstRow,
+                              isLastRow: isLastRow)
         weekdayCell.switchWeekday.tag = indexPath.row
         weekdayCell.switchWeekday.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
         if let weekday = viewController.selectedWeekdays[indexPath.row] {

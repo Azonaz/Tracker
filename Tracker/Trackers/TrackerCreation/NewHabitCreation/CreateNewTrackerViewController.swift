@@ -1,11 +1,11 @@
 import UIKit
 
-protocol UpdateSubtitleDelegate: AnyObject {
+protocol UpdateCellSubtitleDelegate: AnyObject {
     func updateCategorySubtitle(from string: String?, at indexPath: IndexPath?)
     func updateScheduleSubtitle(from weekday: [Weekday]?, at selectedWeekday: [Int: Bool])
 }
 
-final class NewHabitViewController: UIViewController {
+final class CreateNewTrackerViewController: UIViewController {
 
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
@@ -15,16 +15,14 @@ final class NewHabitViewController: UIViewController {
     private lazy var titleCells: [String] = {
         isHabit ? ["Категория", "Расписание"] : ["Категория"]
     }()
- //   private var tableHeight: CGFloat = 0
-  //  let trackerType: TrackerType
     private var trackerTitle: String = ""
     private var categorySubtitle: String = ""
     private lazy var scheduleSubtitle: [Weekday] = {
         isHabit ? [] : Weekday.allCases
     }()
     private var selectedWeekdays: [Int: Bool] = [:]
-    private var tableViewDataSource: NewHabbitViewDataSource?
-    private var tableViewDelegate: NewHabbitViewDelegate?
+    private var tableViewDataSource: NewTrackerDataSource?
+    private var tableViewDelegate: NewTrackerDelegate?
 
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
@@ -66,7 +64,7 @@ final class NewHabitViewController: UIViewController {
         tableView.rowHeight = 75
         tableView.dataSource = tableViewDataSource
         tableView.delegate = tableViewDelegate
-        tableView.register(NewHabitCell.self, forCellReuseIdentifier: NewHabitCell.reuseIdentifier)
+        tableView.register(NewTrackerSubtitleCell.self, forCellReuseIdentifier: NewTrackerSubtitleCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
@@ -118,8 +116,8 @@ final class NewHabitViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableViewDataSource = NewHabbitViewDataSource(viewController: self)
-        tableViewDelegate = NewHabbitViewDelegate(viewController: self)
+        tableViewDataSource = NewTrackerDataSource(viewController: self)
+        tableViewDelegate = NewTrackerDelegate(viewController: self)
         createView()
     }
 
@@ -225,7 +223,7 @@ final class NewHabitViewController: UIViewController {
     }
 }
 
-extension NewHabitViewController: UITextFieldDelegate {
+extension CreateNewTrackerViewController: UITextFieldDelegate {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
@@ -253,7 +251,7 @@ extension NewHabitViewController: UITextFieldDelegate {
     }
 }
 
-extension NewHabitViewController: UpdateSubtitleDelegate {
+extension CreateNewTrackerViewController: UpdateCellSubtitleDelegate {
     func updateCategorySubtitle(from string: String?, at indexPath: IndexPath?) {
         categorySubtitle = string ?? ""
         indexCategory = indexPath

@@ -1,6 +1,6 @@
 import UIKit
 
-final class TrackerSearchBar: UISearchBar {
+final class TrackerSearchTextBar: UISearchBar {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
