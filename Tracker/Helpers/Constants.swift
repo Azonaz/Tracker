@@ -9,6 +9,3 @@ let colorSelection: [UIColor] = [
     .colorSelection7, .colorSelection8, .colorSelection9, .colorSelection10, .colorSelection11, .colorSelection12,
     .colorSelection13, .colorSelection14, .colorSelection15, .colorSelection16, .colorSelection17, .colorSelection18
 ]
-
-let weekdays: [String] = ["Понедельник", "Вторник", "Среда", "Четверг",
-                          "Пятница", "Суббота", "Воскресенье"]

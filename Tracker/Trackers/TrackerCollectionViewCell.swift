@@ -1,176 +1,198 @@
 import UIKit
+
 protocol TrackerCollectionViewCellDelegate: AnyObject {
-    func dayCheckButtonTapped(viewModel: TrackerCellView)
+    func getSelectedDate() -> Date?
+    func updateTrackers()
+    func doneTracker(id: UUID, at indexPath: IndexPath)
+    func undoneTracker(id: UUID, at indexPath: IndexPath)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "CellTrackerCollection"
     weak var delegate: TrackerCollectionViewCellDelegate?
-    private var cardModel: TrackerCellView?
-    
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .ypWhite
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.numberOfLines = 2
-        label.lineBreakMode = .byWordWrapping
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private lazy var emodjiLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textAlignment = .center
-        label.backgroundColor = .white.withAlphaComponent(0.3)
-        label.layer.cornerRadius = 12
-        label.layer.masksToBounds = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private lazy var colorView: UIView = {
+    private let currentDate: Date? = nil
+    private var isCompletedToday: Bool = false
+    private var trackerId: UUID?
+    private var indexPath: IndexPath?
+
+    private lazy var trackerView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
-    private lazy var quantityLabel: UILabel = {
-       let label = UILabel()
+
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .ypWhite
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var emodjiLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textAlignment = .center
+        label.backgroundColor = .ypWhite.withAlphaComponent(0.3)
+        label.layer.cornerRadius = 12
+        label.layer.masksToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var stackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fill
+        stack.spacing = 8
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    private lazy var countDayLabel: UILabel = {
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private lazy var quantityButton: UIButton = {
-        let button = UIButton()
-        button.layer.cornerRadius = 17
-        button.setPreferredSymbolConfiguration((.init(pointSize: 12)), forImageIn: .normal)
+
+    private lazy var plusImage: UIImage = {
+        let pointSize = UIImage.SymbolConfiguration(pointSize: 11)
+        let image = UIImage(systemName: "plus", withConfiguration: pointSize) ?? UIImage()
+        return image
+    }()
+
+    private lazy var doneImage: UIImage = {
+        let pointSize = UIImage.SymbolConfiguration(pointSize: 12)
+        let image = UIImage(systemName: "checkmark", withConfiguration: pointSize) ?? UIImage()
+        return image
+    }()
+
+    private lazy var countDayButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.layer.cornerRadius = 16
         button.tintColor = .ypWhite
+        button.addTarget(self, action: #selector(tapCountDayButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(tapQuantityButton), for: .touchUpInside)
         return button
     }()
-    
-    private var days: [String] = ["день", "дня", "дней"]
-    private var quantity: Int = 0
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addViews()
+    func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, at indexPath: IndexPath) {
+        self.isCompletedToday = isCompletedToday
+        self.trackerId = tracker.id
+        self.indexPath = indexPath
+        let color = tracker.color
+        createSubviews()
+        trackerView.backgroundColor = color
+        countDayButton.backgroundColor = color
+        titleLabel.text = tracker.title
+        emodjiLabel.text = tracker.emodji
+        let daysText = getDaysText(completedDays)
+        countDayLabel.text = daysText
+        checkDoneToday()
+        checkDate()
     }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+
+    private func createSubviews() {
+        addTrackerView()
+        addStackView()
+        addEmojiLabel()
+        addTrackerTitleLabel()
+        addCounterDayLabel()
+        addCountDayButton()
     }
-    
-    func configCell(viewModel: TrackerCellView) {
-        titleLabel.text = viewModel.tracker.title
-        emodjiLabel.text = viewModel.tracker.emodji
-        quantityLabel.text = "\(viewModel.dayCounter) \(days)"
-        colorView.backgroundColor = viewModel.tracker.color
-        self.cardModel = viewModel
-        dayCheckButtonState()
-        dayCheckButtonIsEnabled()
-        
-        
-    }
-    
-    private func activateConstraints() {
+
+    private func addTrackerView() {
+        contentView.addSubview(trackerView)
         NSLayoutConstraint.activate([
-            colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            colorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            colorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            colorView.heightAnchor.constraint(equalToConstant: 90),
-            emodjiLabel.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
-            emodjiLabel.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: 12),
-            emodjiLabel.heightAnchor.constraint(equalToConstant: 24),
-            emodjiLabel.widthAnchor.constraint(equalToConstant: 24),
-            titleLabel.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -12),
-            titleLabel.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: 12),
-            titleLabel.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -12),
-            quantityButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
-            quantityButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            quantityButton.heightAnchor.constraint(equalToConstant: 34),
-            quantityButton.widthAnchor.constraint(equalToConstant: 34),
-            quantityLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            quantityLabel.trailingAnchor.constraint(equalTo: quantityButton.leadingAnchor, constant: -8),
-            quantityLabel.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor)
+            trackerView.heightAnchor.constraint(equalToConstant: 90),
+            trackerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            trackerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            trackerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
         ])
     }
-    
-    private func addViews() {
-        contentView.backgroundColor = .clear
-        contentView.addSubview(colorView)
-        colorView.addSubview(emodjiLabel)
-        colorView.addSubview(titleLabel)
-        contentView.addSubview(quantityButton)
-        contentView.addSubview(quantityLabel)
-        activateConstraints()
-        dayCheckButtonState()
-        addViews()
+
+    private func addStackView() {
+        contentView.addSubview(stackView)
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: trackerView.bottomAnchor),
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12)
+        ])
     }
-    
+
+    private func addEmojiLabel() {
+        trackerView.addSubview(emodjiLabel)
+        NSLayoutConstraint.activate([
+            emodjiLabel.widthAnchor.constraint(equalToConstant: 24),
+            emodjiLabel.heightAnchor.constraint(equalToConstant: 24),
+            emodjiLabel.topAnchor.constraint(equalTo: trackerView.topAnchor, constant: 12),
+            emodjiLabel.leadingAnchor.constraint(equalTo: trackerView.leadingAnchor, constant: 12)
+        ])
+    }
+
+    private func addTrackerTitleLabel() {
+        trackerView.addSubview(titleLabel)
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: emodjiLabel.leadingAnchor),
+            titleLabel.bottomAnchor.constraint(equalTo: trackerView.bottomAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: trackerView.trailingAnchor, constant: -12)
+        ])
+    }
+
+    private func addCounterDayLabel() {
+        stackView.addArrangedSubview(countDayLabel)
+    }
+
+    private func addCountDayButton() {
+        stackView.addArrangedSubview(countDayButton)
+        NSLayoutConstraint.activate([
+            countDayButton.widthAnchor.constraint(equalToConstant: 34),
+            countDayButton.heightAnchor.constraint(equalToConstant: 34),
+            countDayButton.topAnchor.constraint(equalTo: stackView.topAnchor, constant: 8)
+        ])
+    }
+
+    private func getDaysText(_ completedDays: Int) -> String {
+        let lastTwoDigits = completedDays % 100
+        if lastTwoDigits >= 11 && lastTwoDigits <= 19 {
+            return "\(completedDays) дней"
+        } else {
+            switch completedDays % 10 {
+            case 1:
+                return "\(completedDays) день"
+            case 2...4:
+                return "\(completedDays) дня"
+            default:
+                return "\(completedDays) дней"
+            }
+        }
+    }
+
+    private func checkDoneToday() {
+        let opacity: Float = isCompletedToday ? 0.3 : 1.0
+        let image = isCompletedToday ? doneImage : plusImage
+        countDayButton.setImage(image, for: .normal)
+        countDayButton.layer.opacity = opacity
+    }
+
+    private func checkDate() {
+        let selectedDate = delegate?.getSelectedDate() ?? Date()
+        countDayButton.isEnabled = selectedDate <= currentDate ?? Date()
+    }
+
     @objc
-    private func tapQuantityButton(_ sender: UIButton) {
-        cardModel?.buttonIsChecked.toggle()
-        
-        guard let cardModel = cardModel else { return }
-        delegate?.dayCheckButtonTapped(viewModel: cardModel)
-    }
-    
-    func dayCheckButtonState() {
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 10, weight: .bold)
-        var symbolImage: UIImage?
-        guard let cardModel = cardModel else { return }
-        if cardModel.buttonIsChecked {
-            symbolImage = .checkImage
-            quantityButton.layer.opacity = 0.3
+    private func tapCountDayButton() {
+        guard let trackerId, let indexPath else {
+            assert(false, "ID not found")
+            return
+        }
+        if isCompletedToday {
+            delegate?.undoneTracker(id: trackerId, at: indexPath)
         } else {
-            symbolImage = .plusTracker
-            quantityButton.layer.opacity = 1.0
+            delegate?.doneTracker(id: trackerId, at: indexPath)
         }
-        quantityButton.setImage(symbolImage, for: .normal)
-    }
-    
-    func dayCheckButtonIsEnabled() {
-        guard let cardModel = cardModel,
-              let selectDate = TrackersViewController.selectDay else { return }
-        let currentDate = Date()
-        let calendar = Calendar.current
-        let isButtonEnabled = calendar.compare(currentDate, to: selectDate, toGranularity: .day) != .orderedAscending
-        
-        if cardModel.buttonIsEnable && isButtonEnabled {
-            quantityButton.isEnabled = true
-            quantityButton.backgroundColor = cardModel.tracker.color.withAlphaComponent(1)
-        } else {
-            quantityButton.isEnabled = false
-            quantityButton.backgroundColor = cardModel.tracker.color.withAlphaComponent(0.3)
-        }
-    }
-    
-    private func addQuantityLabelText() {
-        switch quantity {
-        case 1:
-            quantityLabel.text = "\(quantity) \(days[0])"
-        case 2...4:
-            quantityLabel.text = "\(quantity) \(days[1])"
-        default:
-            quantityLabel.text = "\(quantity) \(days[2])"
-        }
-    }
-    
-    func setTracker(_ model: Tracker) {
-        titleLabel.text = model.title
-        colorView.backgroundColor = model.color
-        quantityButton.backgroundColor = model.color
-        emodjiLabel.text = model.emodji
-    }
-    
-    func setQuantity(_ sender: Int) {
-        quantity = sender
-        addQuantityLabelText()
     }
 }
