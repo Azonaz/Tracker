@@ -10,6 +10,7 @@ final class CreateNewTrackerViewController: UIViewController {
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
     private let mockData = MockData.shared
+    private let collectionViewHeaders = ["Emodji", "Цвет"]
     private var tableTitles: [String] = []
     private var isHabit: Bool
     private lazy var titleCells: [String] = {
@@ -23,6 +24,20 @@ final class CreateNewTrackerViewController: UIViewController {
     private var selectedWeekdays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
+    
+    private lazy var scrollView: UIScrollView = {
+       let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.isScrollEnabled = true
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private lazy var containView: UIView = {
+       let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
@@ -30,7 +45,7 @@ final class CreateNewTrackerViewController: UIViewController {
         textField.textColor = .ypBlack
         textField.clearButtonMode = .whileEditing
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
-        textField.leftViewMode =  .always
+        textField.leftViewMode = .always
         let attribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
         textField.attributedPlaceholder = NSAttributedString(string: "Введите название трекера", attributes: attribute)
         textField.layer.cornerRadius = 16
@@ -67,6 +82,23 @@ final class CreateNewTrackerViewController: UIViewController {
         tableView.register(NewTrackerSubtitleCell.self, forCellReuseIdentifier: NewTrackerSubtitleCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
+    }()
+
+    private lazy var collectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.backgroundColor = .ypWhite
+        collectionView.allowsMultipleSelection = true
+        collectionView.showsVerticalScrollIndicator = false
+  //      collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(NewTrackerCollectionCell.self,
+                                forCellWithReuseIdentifier: NewTrackerCollectionCell.reuseIdentifier)
+        collectionView.register(NewTrackerCollectionHeader.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
     }()
 
     private lazy var cancelButton: UIButton = {
@@ -137,7 +169,12 @@ final class CreateNewTrackerViewController: UIViewController {
             buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             buttonStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             buttonStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            buttonStackView.heightAnchor.constraint(equalToConstant: 60)
+            buttonStackView.heightAnchor.constraint(equalToConstant: 60),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: habitTableView.bottomAnchor, constant: 16),
+            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16)
+           // collectionView.heightAnchor.constraint(equalToConstant: 476)
         ])
     }
 
@@ -150,6 +187,7 @@ final class CreateNewTrackerViewController: UIViewController {
         view.addSubview(textFieldStackView)
         view.addSubview(habitTableView)
         view.addSubview(buttonStackView)
+        view.addSubview(collectionView)
         activateConstraints()
     }
 
@@ -264,5 +302,90 @@ extension CreateNewTrackerViewController: UpdateCellSubtitleDelegate {
         selectedWeekdays = selectedWeekday
         let indexPath = IndexPath(row: 1, section: 0)
         habitTableView.reloadRows(at: [indexPath], with: .none)
+    }
+}
+
+extension CreateNewTrackerViewController: UICollectionViewDelegate {
+}
+
+extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 52, height: 52)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 2
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        let indexPath = IndexPath(row: 0, section: section)
+        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind:
+                                                UICollectionView.elementKindSectionHeader, at: indexPath)
+        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: 34),
+                                                  withHorizontalFittingPriority: .required,
+                                                  verticalFittingPriority: .fittingSizeLevel)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 18)
+    }
+}
+
+extension CreateNewTrackerViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch section {
+        case 0:
+            return emodjies.count
+        case 1:
+            return colorSelection.count
+        default:
+            return 18
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:
+                                                                NewTrackerCollectionCell.reuseIdentifier,
+                                                            for: indexPath)
+                as? NewTrackerCollectionCell else { return UICollectionViewCell() }
+        switch indexPath.section {
+        case 0:
+            cell.addEmodji(emodjies[indexPath.row])
+        default:
+            cell.addColor(colorSelection[indexPath.row])
+        }
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
+        let id: String
+        switch kind {
+        case UICollectionView.elementKindSectionHeader:
+            id = NewTrackerCollectionHeader.reuseIdentifier
+        default:
+            id = ""
+        }
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id,
+                                                                         for: indexPath) as? NewTrackerCollectionHeader
+        else { return UICollectionReusableView() }
+        let header = collectionViewHeaders[indexPath.section]
+        view.addHeader(header)
+        return view
     }
 }

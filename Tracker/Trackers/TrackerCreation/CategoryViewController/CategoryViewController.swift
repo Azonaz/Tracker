@@ -9,12 +9,42 @@ final class CategoryViewController: UIViewController {
     private var tableViewDelegate: CategoryViewDelegate?
     private var tableViewDataSource: CategoryViewDataSource?
 
-    private lazy var placeholderView: UIView = {
-        PlaceholderView(image: .emptyTrackers,
-                        title: """
-                        Привычки и события можно
-                        объединить по смыслу
-                        """)
+    private lazy var placeholderImage: UIImageView = {
+        let image = UIImageView()
+        image.image = .emptyTrackers
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+
+    private lazy var placeholderText: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .ypBlack
+        label.numberOfLines = 2
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 8
+        paragraphStyle.alignment = .center
+        let attributedText = NSMutableAttributedString(string: """
+                                                               Привычки и события можно
+                                                               объединить по смыслу
+                                                               """)
+        attributedText.addAttribute(.paragraphStyle, value: paragraphStyle,
+                                    range: NSRange(location: 0, length: attributedText.length))
+        label.attributedText = attributedText
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var placeholderStackView: UIStackView = {
+       let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .center
+        stackView.distribution = .equalSpacing
+        stackView.addArrangedSubview(placeholderImage)
+        stackView.addArrangedSubview(placeholderText)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
 
     private lazy var tableView: UITableView = {
@@ -54,8 +84,8 @@ final class CategoryViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: addCategoryButton.topAnchor, constant: -16),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            placeholderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             addCategoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             addCategoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
@@ -69,7 +99,7 @@ final class CategoryViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(placeholderView)
+        view.addSubview(placeholderStackView)
         view.addSubview(tableView)
         view.addSubview(addCategoryButton)
         activateConstraints()
@@ -81,11 +111,11 @@ final class CategoryViewController: UIViewController {
 
     private func checkPlaceholder() {
         if categoriesList.isEmpty {
-            placeholderView.isHidden = false
+            placeholderStackView.isHidden = false
             tableView.isHidden = true
         } else {
             tableView.isHidden = false
-            placeholderView.isHidden = true
+            placeholderStackView.isHidden = true
         }
     }
 

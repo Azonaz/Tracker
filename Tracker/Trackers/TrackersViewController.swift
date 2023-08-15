@@ -47,18 +47,32 @@ class TrackersViewController: UIViewController {
         return collectionView
     }()
 
-    private lazy var placeholderView: UIView = {
-        PlaceholderView(
-            image: UIImage.emptyTrackers,
-            title: "Что будем отслеживать?"
-        )
+    private lazy var placeholderImage: UIImageView = {
+        let image = UIImageView()
+        image.image = .emptyTrackers
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
     }()
 
-    private lazy var notFoundedPlaceholderView: UIView = {
-        PlaceholderView(
-            image: UIImage.notFounded,
-            title: "Ничего не найдено"
-        )
+    private lazy var placeholderText: UILabel = {
+       let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .ypBlack
+        label.text = "Что будем отслеживать?"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    private lazy var placeholderStackView: UIStackView = {
+       let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .center
+        stackView.distribution = .equalSpacing
+        stackView.addArrangedSubview(placeholderImage)
+        stackView.addArrangedSubview(placeholderText)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
     }()
 
     override func viewDidLoad() {
@@ -76,7 +90,7 @@ class TrackersViewController: UIViewController {
         createNavigationBar()
         createSearchTextField()
         createTrackersCollectionView()
-        createPlaceholderView(placeholderView)
+        createPlaceholderView()
     }
 
     private func reloadData() {
@@ -117,27 +131,27 @@ class TrackersViewController: UIViewController {
                                 withReuseIdentifier: SupplementaryView.reuseIdentifier)
     }
 
-    private func createPlaceholderView(_ placeholder: UIView) {
-        view.addSubview(placeholder)
+    private func createPlaceholderView() {
+        view.addSubview(placeholderStackView)
         NSLayoutConstraint.activate([
-            placeholder.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholder.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 
     private func updatePlaceholder() {
         if !categories.isEmpty && visibleCategories.isEmpty {
-            createPlaceholderView(notFoundedPlaceholderView)
-            placeholderView.isHidden = true
+            placeholderImage.image = .notFounded
+            placeholderText.text = "Ничего не найдено"
+            placeholderStackView.isHidden = false
             collectionView.isHidden = true
         } else if categories.isEmpty {
-            placeholderView.isHidden = false
-            notFoundedPlaceholderView.isHidden = true
+            placeholderStackView.isHidden = false
         } else {
-            placeholderView.isHidden = true
+            placeholderStackView.isHidden = true
             collectionView.isHidden = false
         }
-        notFoundedPlaceholderView.isHidden = !visibleCategories.isEmpty
+        placeholderStackView.isHidden = !visibleCategories.isEmpty
     }
 
     private func filterCategories() -> [TrackerCategory] {

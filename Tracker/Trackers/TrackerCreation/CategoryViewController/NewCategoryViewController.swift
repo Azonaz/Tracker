@@ -12,6 +12,8 @@ final class NewCategoryViewController: UIViewController {
         textField.backgroundColor = .ypBackground
         textField.textColor = .ypBlack
         textField.clearButtonMode = .whileEditing
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
+        textField.leftViewMode = .always
         let attributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
         textField.attributedPlaceholder = NSAttributedString(string: "Введите название категории",
                                                              attributes: attributes)
