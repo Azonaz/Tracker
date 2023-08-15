@@ -24,7 +24,7 @@ final class CreateNewTrackerViewController: UIViewController {
     private var selectedWeekdays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
-    
+
     private lazy var scrollView: UIScrollView = {
        let scrollView = UIScrollView()
         scrollView.showsHorizontalScrollIndicator = false
@@ -32,7 +32,7 @@ final class CreateNewTrackerViewController: UIViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
-    
+
     private lazy var containView: UIView = {
        let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -89,7 +89,7 @@ final class CreateNewTrackerViewController: UIViewController {
         collectionView.backgroundColor = .ypWhite
         collectionView.allowsMultipleSelection = true
         collectionView.showsVerticalScrollIndicator = false
-  //      collectionView.isScrollEnabled = false
+        collectionView.isScrollEnabled = false
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(NewTrackerCollectionCell.self,
@@ -155,26 +155,36 @@ final class CreateNewTrackerViewController: UIViewController {
 
     private func activateConstraints() {
         NSLayoutConstraint.activate([
-            textFieldStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            textFieldStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textFieldStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            containView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            containView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            containView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            containView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            containView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            containView.heightAnchor.constraint(greaterThanOrEqualTo: collectionView.heightAnchor),
+            textFieldStackView.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
+            textFieldStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
+            textFieldStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
             nameTextField.leadingAnchor.constraint(equalTo: textFieldStackView.leadingAnchor),
             nameTextField.trailingAnchor.constraint(equalTo: textFieldStackView.trailingAnchor),
             errorLabel.heightAnchor.constraint(equalToConstant: 38),
             habitTableView.topAnchor.constraint(equalTo: textFieldStackView.bottomAnchor, constant: 24),
-            habitTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            habitTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            habitTableView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
+            habitTableView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
             habitTableView.heightAnchor.constraint(equalToConstant: isHabit ? 150 : 75),
-            buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            buttonStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            buttonStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            buttonStackView.bottomAnchor.constraint(equalTo: containView.bottomAnchor),
+            buttonStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -20),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60),
-            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: habitTableView.bottomAnchor, constant: 16),
-            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16)
-           // collectionView.heightAnchor.constraint(equalToConstant: 476)
+            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16),
+            collectionView.heightAnchor.constraint(equalToConstant: 464)
         ])
     }
 
@@ -184,10 +194,12 @@ final class CreateNewTrackerViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(textFieldStackView)
-        view.addSubview(habitTableView)
-        view.addSubview(buttonStackView)
-        view.addSubview(collectionView)
+        view.addSubview(scrollView)
+        scrollView.addSubview(containView)
+        containView.addSubview(textFieldStackView)
+        containView.addSubview(habitTableView)
+        containView.addSubview(buttonStackView)
+        containView.addSubview(collectionView)
         activateConstraints()
     }
 
@@ -337,7 +349,7 @@ extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 18)
+        return UIEdgeInsets(top: 18, left: 18, bottom: 18, right: 18)
     }
 }
 
@@ -361,8 +373,10 @@ extension CreateNewTrackerViewController: UICollectionViewDataSource {
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:
                                                                 NewTrackerCollectionCell.reuseIdentifier,
-                                                            for: indexPath)
-                as? NewTrackerCollectionCell else { return UICollectionViewCell() }
+                                                            for: indexPath) as? NewTrackerCollectionCell
+        else {
+            return UICollectionViewCell()
+        }
         switch indexPath.section {
         case 0:
             cell.addEmodji(emodjies[indexPath.row])
@@ -374,16 +388,12 @@ extension CreateNewTrackerViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,
                         at indexPath: IndexPath) -> UICollectionReusableView {
-        let id: String
-        switch kind {
-        case UICollectionView.elementKindSectionHeader:
-            id = NewTrackerCollectionHeader.reuseIdentifier
-        default:
-            id = ""
-        }
-        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id,
+        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier:
+                                                                            NewTrackerCollectionHeader.reuseIdentifier,
                                                                          for: indexPath) as? NewTrackerCollectionHeader
-        else { return UICollectionReusableView() }
+        else {
+            return UICollectionReusableView()
+        }
         let header = collectionViewHeaders[indexPath.section]
         view.addHeader(header)
         return view
