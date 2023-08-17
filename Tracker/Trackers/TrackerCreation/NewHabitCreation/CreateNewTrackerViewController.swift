@@ -24,6 +24,10 @@ final class CreateNewTrackerViewController: UIViewController {
     private var selectedWeekdays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
+    private var emodji: String?
+    private var color: UIColor?
+    private var selectedIndexEmodjy: IndexPath?
+    private var selectedIndexColor: IndexPath?
 
     private lazy var scrollView: UIScrollView = {
        let scrollView = UIScrollView()
@@ -77,6 +81,7 @@ final class CreateNewTrackerViewController: UIViewController {
     private lazy var habitTableView: UITableView = {
         let tableView = UITableView()
         tableView.rowHeight = 75
+        tableView.isScrollEnabled = false
         tableView.dataSource = tableViewDataSource
         tableView.delegate = tableViewDelegate
         tableView.register(NewTrackerSubtitleCell.self, forCellReuseIdentifier: NewTrackerSubtitleCell.reuseIdentifier)
@@ -209,8 +214,8 @@ final class CreateNewTrackerViewController: UIViewController {
         }
         let newTracker = Tracker(id: UUID(),
                                  title: trackerTitle,
-                                 color: colorSelection.randomElement() ?? UIColor(),
-                                 emodji: emodjies.randomElement() ?? String(),
+                                 color: color ?? UIColor(),
+                                 emodji: emodji ?? String(),
                                  schedule: scheduleSubtitle)
         let categoryTitle = categorySubtitle
         if let index = mockData.categories.firstIndex(where: {
@@ -318,6 +323,31 @@ extension CreateNewTrackerViewController: UpdateCellSubtitleDelegate {
 }
 
 extension CreateNewTrackerViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            if let selectedCellIndex = selectedIndexEmodjy {
+                let cell = collectionView.cellForItem(at: selectedCellIndex)
+                cell?.backgroundColor = .clear
+            }
+            let cell = collectionView.cellForItem(at: indexPath)
+            cell?.layer.cornerRadius = 8
+            cell?.backgroundColor = .ypBackground
+            selectedIndexEmodjy = indexPath
+            emodji = emodjies[indexPath.row]
+        } else if indexPath.section == 1 {
+            if let selectedCellIndex = selectedIndexColor {
+                let cell = collectionView.cellForItem(at: selectedCellIndex)
+                cell?.layer.borderWidth = 0
+            }
+            let cell = collectionView.cellForItem(at: indexPath)
+            cell?.layer.borderWidth = 3
+            cell?.layer.cornerRadius = 13
+            let borderColor = colorSelection[indexPath.item].withAlphaComponent(0.3)
+            cell?.layer.borderColor = borderColor.cgColor
+            selectedIndexColor = indexPath
+            color = colorSelection[indexPath.row]
+        }
+    }
 }
 
 extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
@@ -334,17 +364,12 @@ extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 2
+        return 5
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let indexPath = IndexPath(row: 0, section: section)
-        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind:
-                                                UICollectionView.elementKindSectionHeader, at: indexPath)
-        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width, height: 34),
-                                                  withHorizontalFittingPriority: .required,
-                                                  verticalFittingPriority: .fittingSizeLevel)
+        return CGSize(width: collectionView.frame.width, height: 34)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
@@ -359,14 +384,7 @@ extension CreateNewTrackerViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch section {
-        case 0:
-            return emodjies.count
-        case 1:
-            return colorSelection.count
-        default:
-            return 18
-        }
+        return section == 0 ? emodjies.count : (section == 1 ? colorSelection.count : 18)
     }
 
     func collectionView(_ collectionView: UICollectionView,
@@ -377,10 +395,9 @@ extension CreateNewTrackerViewController: UICollectionViewDataSource {
         else {
             return UICollectionViewCell()
         }
-        switch indexPath.section {
-        case 0:
+        if indexPath.section == 0 {
             cell.addEmodji(emodjies[indexPath.row])
-        default:
+        } else {
             cell.addColor(colorSelection[indexPath.row])
         }
         return cell

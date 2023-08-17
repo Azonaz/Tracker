@@ -11,7 +11,8 @@ final class NewTrackerSubtitleCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with title: String, categorySubtitle: String, scheduleSubtitle: String, isFirstRow: Bool) {
+    func configure(with title: String, categorySubtitle: String, scheduleSubtitle: String,
+                   isFirstRow: Bool, isLastRow: Bool) {
         textLabel?.text = title
         textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack
@@ -22,14 +23,16 @@ final class NewTrackerSubtitleCell: UITableViewCell {
         layer.cornerRadius = 16
         selectionStyle = .none
         accessoryType = .disclosureIndicator
-        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         if isFirstRow {
             detailTextLabel?.text = categorySubtitle
-            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            if !isLastRow {
+                layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            }
         } else {
             detailTextLabel?.text = scheduleSubtitle
-            layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
+            if isLastRow {
+                layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            }
         }
     }
 }
