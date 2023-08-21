@@ -19,12 +19,12 @@ final class NewTrackerDataSource: NSObject, UITableViewDataSource {
         let categorySubtitle = viewController.getCategorySubtitle()
         let scheduleSubtitle = viewController.getScheduleSubtitle(from: viewController.getSchedule())
         let isFirstRow = indexPath.row == 0
-        let isSingleRowInSection = tableView.numberOfRows(inSection: indexPath.section) == 1
+        let isLastRow = indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1
         itemCell.configure(with: title,
                            categorySubtitle: categorySubtitle,
                            scheduleSubtitle: scheduleSubtitle,
                            isFirstRow: isFirstRow,
-                           isLastRow: isSingleRowInSection)
+                           isLastRow: isLastRow)
         return itemCell
     }
 }

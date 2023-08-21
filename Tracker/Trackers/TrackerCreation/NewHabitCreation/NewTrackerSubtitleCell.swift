@@ -23,16 +23,15 @@ final class NewTrackerSubtitleCell: UITableViewCell {
         layer.cornerRadius = 16
         selectionStyle = .none
         accessoryType = .disclosureIndicator
-        if isFirstRow {
-            detailTextLabel?.text = categorySubtitle
-            if !isLastRow {
-                layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-            }
+        detailTextLabel?.text = categorySubtitle
+        if isFirstRow && isLastRow {
+            layer.cornerRadius = 16
+        } else if isFirstRow {
+            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        } else if isLastRow {
+            layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         } else {
-            detailTextLabel?.text = scheduleSubtitle
-            if isLastRow {
-                layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-            }
+            layer.cornerRadius = 0
         }
     }
 }

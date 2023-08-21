@@ -330,8 +330,8 @@ extension CreateNewTrackerViewController: UICollectionViewDelegate {
                 cell?.backgroundColor = .clear
             }
             let cell = collectionView.cellForItem(at: indexPath)
-            cell?.layer.cornerRadius = 8
-            cell?.backgroundColor = .ypBackground
+            cell?.layer.cornerRadius = 13
+            cell?.backgroundColor = .ypLightGray
             selectedIndexEmodjy = indexPath
             emodji = emodjies[indexPath.row]
         } else if indexPath.section == 1 {
