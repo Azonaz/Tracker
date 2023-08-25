@@ -3,7 +3,7 @@ import UIKit
 final class CategoryViewController: UIViewController {
     weak var delegate: UpdateCellSubtitleDelegate?
     var selectedIndexPath: IndexPath?
-    private let mockData = MockData.shared
+    private let trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore()
     private var categoriesList: [TrackerCategory] = []
     private var categoryTitle: String = ""
     private var tableViewDelegate: CategoryViewDelegate?
@@ -106,7 +106,11 @@ final class CategoryViewController: UIViewController {
     }
 
     private func getCategories() {
-        categoriesList = mockData.categories
+        do {
+            categoriesList = try trackerCategoryStore.getTrackerCategories()
+        } catch {
+            assertionFailure("Unable to get categories' list")
+        }
     }
 
     private func checkPlaceholder() {
@@ -138,11 +142,21 @@ final class CategoryViewController: UIViewController {
 }
 
 extension CategoryViewController: NewCategoryViewControllerDelegate {
-
     func updateCategoriesList(with category: TrackerCategory) {
-        categoriesList.append(category)
-        mockData.update(categories: [category])
-        checkPlaceholder()
+        do {
+            try trackerCategoryStore.addTrackerCategory(category)
+        } catch {
+            assertionFailure("Unable to add category")
+        }
+    }
+}
+
+extension CategoryViewController: TrackerCategoryStoreDelegate {
+    func didUpdate(_ update: TrackerCategoryStoreUpdate) {
+        getCategories()
+        tableView.performBatchUpdates {
+            tableView.insertRows(at: update.insertedIndexPaths, with: .automatic)
+        }
         tableView.reloadData()
     }
 }

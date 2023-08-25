@@ -13,7 +13,7 @@ final class CategoryViewDelegate: NSObject, UITableViewDelegate {
         viewController.selectedIndexPath = indexPath
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         let titleCategory = viewController.getCategoryTitle(viewController.getCategoriesList()[indexPath.row].title)
-        viewController.delegate?.updateCategorySubtitle(from: titleCategory, at: viewController.selectedIndexPath)
+        viewController.delegate?.updateCategorySubtitle(with: titleCategory, at: viewController.selectedIndexPath)
         viewController.dismiss(animated: true)
     }
 

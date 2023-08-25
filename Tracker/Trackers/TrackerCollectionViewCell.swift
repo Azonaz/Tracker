@@ -1,7 +1,7 @@
 import UIKit
 
 protocol TrackerCollectionViewCellDelegate: AnyObject {
-    func getSelectedDate() -> Date?
+    func getSelectedDate() -> Date
     func updateTrackers()
     func doneTracker(id: UUID, at indexPath: IndexPath)
     func undoneTracker(id: UUID, at indexPath: IndexPath)

@@ -1,10 +1,11 @@
 import UIKit
 
 class TrackersViewController: UIViewController {
-    private let mockData = MockData.shared
+    private let trackerStore: TrackerStoreProtocol = TrackerStore()
+    private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
+    private let trackerRecordStore: TrackerRecordStoreProtocol = TrackerRecordStore()
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
-    private var doneTrackers: [TrackerRecord] = []
     private var currentDate: Date?
     private var delegate: TrackerCollectionViewDelegate?
     private var dataSourсe: TrackerCollectionViewDataSourse?
@@ -83,6 +84,19 @@ class TrackersViewController: UIViewController {
         reloadData()
     }
 
+    func getTrackersRecords(for tracker: Tracker) -> [TrackerRecord] {
+        do {
+            return try trackerRecordStore.fetchTrackerRecords(for: tracker)
+        } catch {
+            assertionFailure("Unaible to get trackers' records")
+            return []
+        }
+    }
+
+    func getVisibleCategories() -> [TrackerCategory] {
+        visibleCategories
+    }
+
     private func createView() {
         view.backgroundColor = .ypWhite
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -91,11 +105,6 @@ class TrackersViewController: UIViewController {
         createSearchTextField()
         createTrackersCollectionView()
         createPlaceholderView()
-    }
-
-    private func reloadData() {
-        categories = mockData.categories
-        changeDatePicker()
     }
 
     private func createNavigationBar() {
@@ -154,38 +163,40 @@ class TrackersViewController: UIViewController {
         placeholderStackView.isHidden = !visibleCategories.isEmpty
     }
 
-    private func filterCategories() -> [TrackerCategory] {
-        currentDate = datePicker.date
-        let calendar = Calendar.current
-        let filterWeekday = calendar.component(.weekday, from: currentDate ?? Date())
-        let filterText = (searchTextBar.searchTextField.text ?? "").lowercased()
+    private func reloadData() {
+        do {
+            categories = try trackerCategoryStore.getTrackerCategories()
+        } catch {
+            assertionFailure("Unable to get categories")
+        }
+        changeDatePicker()
+    }
+
+    private func applyFiltersToCategories() -> [TrackerCategory] {
+        let selectedWeekday = Calendar.current.component(.weekday, from: datePicker.date)
+        let searchText = searchTextBar.searchTextField.text?.lowercased() ?? ""
         return categories.compactMap { category in
-            let trackers = category.trackers.filter { tracker in
-                let textCondition = filterText.isEmpty || tracker.title.lowercased().contains(filterText)
-                let dateCondition = tracker.schedule?.contains { weekday in
-                    weekday.weekdayNumber == filterWeekday
-                } ?? false
-                return textCondition && dateCondition
+            let filteredTrackers = filterTrackers(in: category, with: searchText, and: selectedWeekday)
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title,
+                                                                    trackers: filteredTrackers)
+        }
+    }
+
+    private func filterTrackers(in category: TrackerCategory, with searchText: String,
+                                and selectedWeekday: Int) -> [Tracker] {
+        return category.trackers.filter { tracker in
+            let matchesSearchText = searchText.isEmpty || tracker.title.lowercased().contains(searchText)
+            let matchesSelectedWeekday = tracker.schedule.contains { weekday in
+                weekday.weekdayInNumber == selectedWeekday
             }
-            if trackers.isEmpty {
-                return nil
-            }
-            return TrackerCategory(title: category.title, trackers: trackers)
+            return matchesSearchText && matchesSelectedWeekday
         }
     }
 
     private func reloadVisibleCategories() {
-        visibleCategories = filterCategories()
+        visibleCategories = applyFiltersToCategories()
         updatePlaceholder()
         collectionView.reloadData()
-    }
-
-    func getVisibleCategories() -> [TrackerCategory] {
-        visibleCategories
-    }
-
-    func getDoneTrackers() -> [TrackerRecord] {
-        doneTrackers
     }
 
     @objc
@@ -231,14 +242,11 @@ extension TrackersViewController: UISearchBarDelegate {
     }
 }
 
-extension TrackersViewController: UICollectionViewDelegate {
-
-}
-
 extension TrackersViewController: TrackerCollectionViewCellDelegate {
 
-    func getSelectedDate() -> Date? {
-        currentDate = datePicker.date
+    func getSelectedDate() -> Date {
+        let dateComponents = Calendar.current.dateComponents([.year, .month, .day], from: datePicker.date)
+        guard let currentDate = Calendar.current.date(from: dateComponents) else { return Date() }
         return currentDate
     }
 
@@ -248,28 +256,34 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
     }
 
     func doneTracker(id: UUID, at indexPath: IndexPath) {
-        currentDate = datePicker.date
-        let trackerRecord = TrackerRecord(id: id, date: currentDate ?? Date())
-        doneTrackers.append(trackerRecord)
+        let trackerRecord = TrackerRecord(id: id, date: getSelectedDate())
+        try? trackerRecordStore.addTrackerRecord(for: trackerRecord.id, by: trackerRecord.date)
         collectionView.reloadItems(at: [indexPath])
     }
 
     func undoneTracker(id: UUID, at indexPath: IndexPath) {
-        doneTrackers.removeAll { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
-        }
+        let trackerRecord = TrackerRecord(id: id, date: getSelectedDate())
+        try? trackerRecordStore.deleteTrackerRecord(for: trackerRecord.id, by: trackerRecord.date)
         collectionView.reloadItems(at: [indexPath])
     }
 
-    func isTrackerDoneToday(id: UUID) -> Bool {
-        doneTrackers.contains { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+    func isDoneTracker(id: UUID, tracker: Tracker) -> Bool {
+        do {
+            return try trackerRecordStore.fetchTrackerRecords(for: tracker).contains { trackerRecord in
+                let date = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
+                return trackerRecord.id == id && date
+            }
+        } catch {
+            return false
         }
     }
+}
 
-    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
-        currentDate = datePicker.date
-        let isSameDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: currentDate ?? Date())
-        return trackerRecord.id == id && isSameDay
+extension TrackersViewController: TrackerStoreDelegate {
+    func didUpdate(_ update: TrackerStoreUpdate) {
+        collectionView.performBatchUpdates {
+            collectionView.insertSections(update.insertedSections)
+            collectionView.insertItems(at: update.insertedIndexPaths)
+        }
     }
 }

@@ -4,7 +4,6 @@ final class ScheduleViewController: UIViewController {
     weak var delegate: UpdateCellSubtitleDelegate?
     var schedule: [Weekday] = []
     var selectedWeekdays: [Int: Bool] = [:]
-    private var dayList: [Weekday] = Weekday.allCases
     private var dataSource: ScheduleViewDataSource?
 
     private lazy var tableView: UITableView = {
@@ -61,12 +60,13 @@ final class ScheduleViewController: UIViewController {
     }
 
     func getWeekdays() -> [Weekday] {
-        dayList
+        let dayList: [Weekday] = Weekday.allCases
+        return dayList
     }
 
     @objc
     private func tapAddButton() {
-        delegate?.updateScheduleSubtitle(from: schedule, at: selectedWeekdays)
+        delegate?.updateScheduleSubtitle(with: schedule, at: selectedWeekdays)
         dismiss(animated: true)
     }
 }

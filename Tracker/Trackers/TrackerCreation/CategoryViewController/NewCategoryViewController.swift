@@ -92,7 +92,7 @@ extension NewCategoryViewController: UITextFieldDelegate {
                    replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.count + string.count - range.length
-        if newLength >= 3 && newLength <= 38 {
+        if newLength >= 1 && newLength <= 38 {
             addButton.isEnabled = true
             addButton.backgroundColor = .ypBlack
         } else {

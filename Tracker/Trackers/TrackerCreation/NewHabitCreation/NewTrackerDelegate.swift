@@ -18,7 +18,7 @@ final class NewTrackerDelegate: NSObject, UITableViewDelegate {
             let scheduleViewController = ScheduleViewController()
             scheduleViewController.delegate = viewController
             scheduleViewController.schedule = viewController.getSchedule()
-            scheduleViewController.selectedWeekdays = viewController.getSelectedWeekdays()
+            scheduleViewController.selectedWeekdays = viewController.getScheduleSelectedDays()
             presentViewController(for: scheduleViewController)
         }
     }

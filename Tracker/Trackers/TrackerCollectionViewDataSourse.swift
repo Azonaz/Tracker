@@ -20,8 +20,8 @@ final class TrackerCollectionViewDataSourse: NSObject, UICollectionViewDataSourc
         guard
             let tracker = cellData?[indexPath.section].trackers[indexPath.row],
             let trackerCell = cell as? TrackerCollectionViewCell,
-            let isCompletedToday = viewController?.isTrackerDoneToday(id: tracker.id),
-            let completedDays = viewController?.getDoneTrackers().filter({
+            let isCompletedToday = viewController?.isDoneTracker(id: tracker.id, tracker: tracker),
+            let completedDays = viewController?.getTrackersRecords(for: tracker).filter({
                 $0.id == tracker.id
             }).count
         else {

@@ -23,12 +23,14 @@ final class NewTrackerSubtitleCell: UITableViewCell {
         layer.cornerRadius = 16
         selectionStyle = .none
         accessoryType = .disclosureIndicator
-        detailTextLabel?.text = categorySubtitle
         if isFirstRow && isLastRow {
+            detailTextLabel?.text = categorySubtitle
             layer.cornerRadius = 16
         } else if isFirstRow {
+            detailTextLabel?.text = categorySubtitle
             layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         } else if isLastRow {
+            detailTextLabel?.text = scheduleSubtitle
             layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         } else {
             layer.cornerRadius = 0

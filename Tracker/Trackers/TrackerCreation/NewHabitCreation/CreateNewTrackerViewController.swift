@@ -1,15 +1,16 @@
 import UIKit
 
 protocol UpdateCellSubtitleDelegate: AnyObject {
-    func updateCategorySubtitle(from string: String?, at indexPath: IndexPath?)
-    func updateScheduleSubtitle(from weekday: [Weekday]?, at selectedWeekday: [Int: Bool])
+    func updateCategorySubtitle(with name: String?, at indexPath: IndexPath?)
+    func updateScheduleSubtitle(with days: [Weekday]?, at scheduleSelectedDays: [Int: Bool])
 }
 
 final class CreateNewTrackerViewController: UIViewController {
 
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
-    private let mockData = MockData.shared
+    private let trackerStore: TrackerStoreProtocol = TrackerStore()
+    private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let collectionViewHeaders = ["Emodji", "Цвет"]
     private var tableTitles: [String] = []
     private var isHabit: Bool
@@ -21,7 +22,7 @@ final class CreateNewTrackerViewController: UIViewController {
     private lazy var scheduleSubtitle: [Weekday] = {
         isHabit ? [] : Weekday.allCases
     }()
-    private var selectedWeekdays: [Int: Bool] = [:]
+    private var scheduleSelectedDays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
     private var emodji: String?
@@ -158,6 +159,30 @@ final class CreateNewTrackerViewController: UIViewController {
         createView()
     }
 
+    func getCellTitles() -> [String] {
+        titleCells
+    }
+
+    func getCategorySubtitle() -> String {
+        categorySubtitle
+    }
+
+    func getSchedule() -> [Weekday] {
+        scheduleSubtitle
+    }
+
+    func getScheduleSelectedDays() -> [Int: Bool] {
+        scheduleSelectedDays
+    }
+
+    func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
+        if scheduleSelectedDays == Weekday.allCases {
+            return "Каждый день"
+        } else {
+            return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
+        }
+    }
+
     private func activateConstraints() {
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -209,56 +234,36 @@ final class CreateNewTrackerViewController: UIViewController {
     }
 
     private func createTracker() {
-        if let text = nameTextField.text, !text.isEmpty {
-            trackerTitle = text
-        }
+        let categoryTitle = categorySubtitle
         let newTracker = Tracker(id: UUID(),
-                                 title: trackerTitle,
+                                 title: nameTextField.text ?? "",
                                  color: color ?? UIColor(),
                                  emodji: emodji ?? String(),
                                  schedule: scheduleSubtitle)
-        let categoryTitle = categorySubtitle
-        if let index = mockData.categories.firstIndex(where: {
-            $0.title == categoryTitle
-        }) {
-            let existingCategory = mockData.categories[index]
-            let updatedTrackers = existingCategory.trackers + [newTracker]
-            let updatedCategory = TrackerCategory(
-                title: existingCategory.title,
-                trackers: updatedTrackers
-            )
-            mockData.categories[index] = updatedCategory
-        } else {
-            let newCategory = TrackerCategory(
-                title: categoryTitle,
-                trackers: [newTracker]
-            )
-            mockData.update(categories: [newCategory])
+        do {
+            let categories = try trackerCategoryStore.getTrackerCategories()
+            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
+                let updatedCategoryTrackers = foundCategory.trackers + [newTracker]
+                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
+                try trackerStore.addTracker(newTracker, in: updatedCategory)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [newTracker])
+                try trackerStore.addTracker(newTracker, in: newCategory)
+            }
+        } catch {
+            assertionFailure("Unable to add tracker")
         }
     }
 
-    func getTitles() -> [String] {
-        titleCells
-    }
-
-    func getCategorySubtitle() -> String {
-        categorySubtitle
-    }
-
-    func getSchedule() -> [Weekday] {
-        scheduleSubtitle
-    }
-
-    func getSelectedWeekdays() -> [Int: Bool] {
-        selectedWeekdays
-    }
-
-    func getScheduleSubtitle(from selectedWeekdays: [Weekday]) -> String {
-        if selectedWeekdays == Weekday.allCases {
-            return "Каждый день"
-        } else {
-            return selectedWeekdays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
-        }
+    private func checkCreateButton() {
+        let isEmodjiSelected = emodji != nil
+        let isColorSelected = color != nil
+        let isCategorySubtitleFilled = !categorySubtitle.isEmpty
+        let isScheduleSubtitleFilled = !scheduleSubtitle.isEmpty || !scheduleSelectedDays.isEmpty
+        let isNameFilled = !(nameTextField.text?.isEmpty ?? true)
+        createButton.isEnabled = isEmodjiSelected && isColorSelected && isCategorySubtitleFilled &&
+        isScheduleSubtitleFilled && isNameFilled
+        createButton.backgroundColor = createButton.isEnabled ? UIColor.ypBlack : UIColor.gray
     }
 
     @objc
@@ -292,31 +297,27 @@ extension CreateNewTrackerViewController: UITextFieldDelegate {
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
                    replacementString string: String) -> Bool {
-        guard let text = textField.text, !text.isEmpty else { return true }
+        guard let text = textField.text else { return true }
         let newTextLength = text.count + string.count - range.length
-        errorLabel.isHidden = (newTextLength <= 38)
-        if newTextLength >= 1 {
-            createButton.isEnabled = true
-            createButton.backgroundColor = UIColor.ypBlack
-        } else {
-            createButton.isEnabled = false
-            createButton.backgroundColor = UIColor.gray
-        }
+        errorLabel.isHidden = newTextLength <= 38
+        checkCreateButton()
         return newTextLength <= 38
     }
 }
 
 extension CreateNewTrackerViewController: UpdateCellSubtitleDelegate {
-    func updateCategorySubtitle(from string: String?, at indexPath: IndexPath?) {
+    func updateCategorySubtitle(with string: String?, at indexPath: IndexPath?) {
         categorySubtitle = string ?? ""
+        checkCreateButton()
         indexCategory = indexPath
         let indexPath = IndexPath(row: 0, section: 0)
         habitTableView.reloadRows(at: [indexPath], with: .none)
     }
 
-    func updateScheduleSubtitle(from weekday: [Weekday]?, at selectedWeekday: [Int: Bool]) {
+    func updateScheduleSubtitle(with weekday: [Weekday]?, at selectedDays: [Int: Bool]) {
         scheduleSubtitle = weekday ?? []
-        selectedWeekdays = selectedWeekday
+        checkCreateButton()
+        scheduleSelectedDays = selectedDays
         let indexPath = IndexPath(row: 1, section: 0)
         habitTableView.reloadRows(at: [indexPath], with: .none)
     }
@@ -347,6 +348,7 @@ extension CreateNewTrackerViewController: UICollectionViewDelegate {
             selectedIndexColor = indexPath
             color = colorSelection[indexPath.row]
         }
+        checkCreateButton()
     }
 }
 
