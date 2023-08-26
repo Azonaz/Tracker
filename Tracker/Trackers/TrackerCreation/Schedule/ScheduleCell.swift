@@ -11,8 +11,8 @@ class ScheduleCell: UITableViewCell {
 
     func configure(with title: String, isFirstRow: Bool, isLastRow: Bool) {
         textLabel?.text = title
-        textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         textLabel?.textColor = .ypBlack
+        textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         backgroundColor = .ypBackground
         layer.cornerRadius = 16
         layer.masksToBounds = true

@@ -3,7 +3,7 @@ import UIKit
 final class ScheduleViewController: UIViewController {
     weak var delegate: UpdateCellSubtitleDelegate?
     var schedule: [Weekday] = []
-    var selectedWeekdays: [Int: Bool] = [:]
+    var scheduleSelectedDays: [Int: Bool] = [:]
     private var dataSource: ScheduleViewDataSource?
 
     private lazy var tableView: UITableView = {
@@ -51,8 +51,8 @@ final class ScheduleViewController: UIViewController {
     private func createView() {
         view.backgroundColor = .ypWhite
         navigationItem.title = "Расписание"
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
-                                                                    UIColor.ypBlack]
+        navigationController?.navigationBar.titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.ypBlack]
         navigationItem.hidesBackButton = true
         view.addSubview(tableView)
         view.addSubview(addButton)
@@ -60,13 +60,13 @@ final class ScheduleViewController: UIViewController {
     }
 
     func getWeekdays() -> [Weekday] {
-        let dayList: [Weekday] = Weekday.allCases
-        return dayList
+        let daysList: [Weekday] = Weekday.allCases
+        return daysList
     }
 
     @objc
     private func tapAddButton() {
-        delegate?.updateScheduleSubtitle(with: schedule, at: selectedWeekdays)
+        delegate?.updateScheduleSubtitle(with: schedule, at: scheduleSelectedDays)
         dismiss(animated: true)
     }
 }

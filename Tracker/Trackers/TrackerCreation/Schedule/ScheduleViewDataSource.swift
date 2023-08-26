@@ -22,7 +22,7 @@ final class ScheduleViewDataSource: NSObject, UITableViewDataSource {
                               isLastRow: isLastRow)
         weekdayCell.switchWeekday.tag = indexPath.row
         weekdayCell.switchWeekday.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
-        if let weekday = viewController.selectedWeekdays[indexPath.row] {
+        if let weekday = viewController.scheduleSelectedDays[indexPath.row] {
             weekdayCell.switchWeekday.setOn(weekday, animated: true)
         } else {
             weekdayCell.switchWeekday.setOn(false, animated: false)
@@ -34,9 +34,9 @@ final class ScheduleViewDataSource: NSObject, UITableViewDataSource {
     private func switchChanged(_ sender: UISwitch) {
         guard let viewController else { return }
         let weekdays = Weekday.allCases
-        viewController.selectedWeekdays[sender.tag] = sender.isOn
+        viewController.scheduleSelectedDays[sender.tag] = sender.isOn
         viewController.schedule = weekdays.enumerated().compactMap { index, weekday in
-            viewController.selectedWeekdays[index] == true ? weekday : nil
+            viewController.scheduleSelectedDays[index] == true ? weekday : nil
         }
     }
 }

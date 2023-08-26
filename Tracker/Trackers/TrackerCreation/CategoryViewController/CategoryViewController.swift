@@ -148,6 +148,8 @@ extension CategoryViewController: NewCategoryViewControllerDelegate {
         } catch {
             assertionFailure("Unable to add category")
         }
+        getCategories()
+        tableView.reloadData()
     }
 }
 

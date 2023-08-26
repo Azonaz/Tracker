@@ -11,7 +11,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "CellTrackerCollection"
     weak var delegate: TrackerCollectionViewCellDelegate?
     private let currentDate: Date? = nil
-    private var isCompletedToday: Bool = false
+    private var isDoneToday: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
 
@@ -79,8 +79,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
 
-    func configure(with tracker: Tracker, isCompletedToday: Bool, completedDays: Int, at indexPath: IndexPath) {
-        self.isCompletedToday = isCompletedToday
+    func configure(with tracker: Tracker, isDoneToday: Bool, doneDays: Int, at indexPath: IndexPath) {
+        self.isDoneToday = isDoneToday
         self.trackerId = tracker.id
         self.indexPath = indexPath
         let color = tracker.color
@@ -89,7 +89,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         countDayButton.backgroundColor = color
         titleLabel.text = tracker.title
         emodjiLabel.text = tracker.emodji
-        let daysText = getDaysText(completedDays)
+        let daysText = getDaysText(doneDays)
         countDayLabel.text = daysText
         checkDoneToday()
         checkDate()
@@ -155,25 +155,23 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    private func getDaysText(_ completedDays: Int) -> String {
-        let lastTwoDigits = completedDays % 100
-        if lastTwoDigits >= 11 && lastTwoDigits <= 19 {
-            return "\(completedDays) дней"
+    private func getDaysText(_ doneDays: Int) -> String {
+        let lastTwoDayDigits = doneDays % 100
+        let lastDayDigit = doneDays % 10
+        if lastTwoDayDigits >= 11 && lastTwoDayDigits <= 19 {
+            return "\(doneDays) дней"
+        } else if lastDayDigit == 1 {
+            return "\(doneDays) день"
+        } else if lastDayDigit >= 2 && lastDayDigit <= 4 {
+            return "\(doneDays) дня"
         } else {
-            switch completedDays % 10 {
-            case 1:
-                return "\(completedDays) день"
-            case 2...4:
-                return "\(completedDays) дня"
-            default:
-                return "\(completedDays) дней"
-            }
+            return "\(doneDays) дней"
         }
     }
 
     private func checkDoneToday() {
-        let opacity: Float = isCompletedToday ? 0.3 : 1.0
-        let image = isCompletedToday ? doneImage : plusImage
+        let opacity: Float = isDoneToday ? 0.3 : 1.0
+        let image = isDoneToday ? doneImage : plusImage
         countDayButton.setImage(image, for: .normal)
         countDayButton.layer.opacity = opacity
     }
@@ -189,7 +187,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             assert(false, "ID not found")
             return
         }
-        if isCompletedToday {
+        if isDoneToday {
             delegate?.undoneTracker(id: trackerId, at: indexPath)
         } else {
             delegate?.doneTracker(id: trackerId, at: indexPath)
