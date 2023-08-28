@@ -1,19 +1,12 @@
 import UIKit
 
-final class NewTrackerCollectionCell: UICollectionViewCell {
-    static let reuseIdentifier = "newTrackerCollectionCell"
-
-    private lazy var emodjiLabel: UILabel = {
-       let label = UILabel()
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+final class NewTrackerColorCollectionCell: UICollectionViewCell {
+    static let reuseIdentifier = "newTrackerColorCollectionCell"
 
     private lazy var colorView: UIView = {
        let view = UIView()
         view.layer.cornerRadius = 8
+        view.layer.masksToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -29,10 +22,6 @@ final class NewTrackerCollectionCell: UICollectionViewCell {
 
     private func activateConstraints() {
         NSLayoutConstraint.activate([
-            emodjiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            emodjiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            emodjiLabel.heightAnchor.constraint(equalToConstant: 52),
-            emodjiLabel.widthAnchor.constraint(equalToConstant: 52),
             colorView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             colorView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             colorView.heightAnchor.constraint(equalToConstant: 40),
@@ -42,13 +31,8 @@ final class NewTrackerCollectionCell: UICollectionViewCell {
 
     private func createView() {
         contentView.backgroundColor = .clear
-        contentView.addSubview(emodjiLabel)
         contentView.addSubview(colorView)
         activateConstraints()
-    }
-
-    func addEmodji(_ model: String) {
-        emodjiLabel.text = model
     }
 
     func addColor(_ model: UIColor) {

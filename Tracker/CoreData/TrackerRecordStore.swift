@@ -38,23 +38,25 @@ private extension TrackerRecordStore {
 
     func fetchTrackerCoreData(for trackerId: UUID) throws -> TrackerCD? {
         let request = TrackerCD.fetchRequest()
-        request.predicate = NSPredicate(format: "%K == %@",
-                                        (\TrackerCD.id)._kvcKeyPathString!, trackerId as CVarArg)
-        guard let trackerCoreData = try context.fetch(request).first else {
+            if let idKeyPath = (\TrackerCD.id)._kvcKeyPathString {
+                request.predicate = NSPredicate(format: "%K == %@", idKeyPath, trackerId as CVarArg)
+                let trackers = try context.fetch(request)
+                return trackers.first
+            }
             throw StoreError.fetchError
-        }
-        return trackerCoreData
     }
 
     func fetchTrackerRecordCoreData(for recordID: UUID, and date: Date) throws -> TrackerRecordCD? {
         let request = TrackerRecordCD.fetchRequest()
+        let trackerIdKeyPath = (\TrackerRecordCD.tracker?.id)._kvcKeyPathString
+        let dateKeyPath = (\TrackerRecordCD.date)._kvcKeyPathString
         request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",
-                                        (\TrackerRecordCD.tracker?.id)._kvcKeyPathString!, recordID as CVarArg,
-                                        (\TrackerRecordCD.date)._kvcKeyPathString!, date as CVarArg)
+                                        trackerIdKeyPath ?? "", recordID as CVarArg,
+                                        dateKeyPath ?? "", date as CVarArg)
         guard let recordCoreData = try context.fetch(request).first else {
-            throw StoreError.fetchError
-        }
-        return recordCoreData
+                    throw StoreError.fetchError
+                }
+                return recordCoreData
     }
 
     func addTrackerRecord(id: UUID, date: Date) throws {

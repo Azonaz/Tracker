@@ -33,7 +33,7 @@ final class TrackerStore: NSObject {
     private var insertedSections: IndexSet = []
     private var insertedIndexPaths: [IndexPath] = []
 
-    private lazy var trackerCategoryStore: TrackerCategoryStoreProtocol = {
+    private lazy var trackerCategoryStore: TrackerCategoryStoreDataProviderProtocol = {
         TrackerCategoryStore(context: context)
     }()
 

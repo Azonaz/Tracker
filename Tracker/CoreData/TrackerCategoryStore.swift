@@ -9,7 +9,7 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
     func didUpdate(_ update: TrackerCategoryStoreUpdate)
 }
 
-protocol TrackerCategoryStoreProtocol {
+protocol TrackerCategoryStoreDataProviderProtocol {
     func fetchTrackerCategory(for category: TrackerCategory) throws -> TrackerCategoryCD
     func getTrackerCategories() throws -> [TrackerCategory]
     func addTrackerCategory(_ category: TrackerCategory) throws
@@ -99,7 +99,7 @@ private extension TrackerCategoryStore {
     }
 }
 
-extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
+extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol {
 
     func fetchTrackerCategory(for category: TrackerCategory) throws -> TrackerCategoryCD {
         try fetchTrackerCategoryCoreData(for: category)

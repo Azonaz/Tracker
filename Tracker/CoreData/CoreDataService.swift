@@ -18,7 +18,7 @@ final class CoreDataService {
         persistentContainer.viewContext
     }
 
-    lazy var persistentContainer: NSPersistentContainer = {
+    private let persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Tracker")
         container.loadPersistentStores(completionHandler: { (_, error) in
             if let error = error as NSError? {
@@ -28,9 +28,7 @@ final class CoreDataService {
         return container
     }()
 
-    private init() {
-        _ = persistentContainer
-    }
+    private init() { }
 
     func saveContext () {
         let context = persistentContainer.viewContext

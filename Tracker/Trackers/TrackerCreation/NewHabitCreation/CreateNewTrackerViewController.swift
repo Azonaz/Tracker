@@ -10,7 +10,7 @@ final class CreateNewTrackerViewController: UIViewController {
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
-    private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
+    private let trackerCategoryStore: TrackerCategoryStoreDataProviderProtocol = TrackerCategoryStore()
     private let collectionViewHeaders = ["Emodji", "Цвет"]
     private var tableTitles: [String] = []
     private var isHabit: Bool
@@ -90,16 +90,33 @@ final class CreateNewTrackerViewController: UIViewController {
         return tableView
     }()
 
-    private lazy var collectionView: UICollectionView = {
+    private lazy var emodjiCollectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         collectionView.backgroundColor = .ypWhite
-        collectionView.allowsMultipleSelection = true
+        collectionView.allowsMultipleSelection = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isScrollEnabled = false
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.register(NewTrackerCollectionCell.self,
-                                forCellWithReuseIdentifier: NewTrackerCollectionCell.reuseIdentifier)
+        collectionView.register(NewTrackerEmodjiCollectionCell.self,
+                                forCellWithReuseIdentifier: NewTrackerEmodjiCollectionCell.reuseIdentifier)
+        collectionView.register(NewTrackerCollectionHeader.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+
+    private lazy var colorCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.backgroundColor = .ypWhite
+        collectionView.allowsMultipleSelection = false
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(NewTrackerColorCollectionCell.self,
+                                forCellWithReuseIdentifier: NewTrackerColorCollectionCell.reuseIdentifier)
         collectionView.register(NewTrackerCollectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
@@ -156,6 +173,9 @@ final class CreateNewTrackerViewController: UIViewController {
         super.viewDidLoad()
         tableViewDataSource = NewTrackerDataSource(viewController: self)
         tableViewDelegate = NewTrackerDelegate(viewController: self)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tapGesture.cancelsTouchesInView = false
+        scrollView.addGestureRecognizer(tapGesture)
         createView()
     }
 
@@ -194,7 +214,6 @@ final class CreateNewTrackerViewController: UIViewController {
             containView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             containView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            containView.heightAnchor.constraint(greaterThanOrEqualTo: collectionView.heightAnchor),
             textFieldStackView.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
             textFieldStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
             textFieldStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
@@ -210,11 +229,15 @@ final class CreateNewTrackerViewController: UIViewController {
             buttonStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 20),
             buttonStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -20),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60),
-            collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: habitTableView.bottomAnchor, constant: 16),
-            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16),
-            collectionView.heightAnchor.constraint(equalToConstant: 464)
+            emodjiCollectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            emodjiCollectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            emodjiCollectionView.topAnchor.constraint(equalTo: habitTableView.bottomAnchor, constant: 16),
+            emodjiCollectionView.heightAnchor.constraint(equalToConstant: 232),
+            colorCollectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            colorCollectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            colorCollectionView.topAnchor.constraint(equalTo: emodjiCollectionView.bottomAnchor),
+            colorCollectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16),
+            colorCollectionView.heightAnchor.constraint(equalToConstant: 232)
         ])
     }
 
@@ -229,7 +252,8 @@ final class CreateNewTrackerViewController: UIViewController {
         containView.addSubview(textFieldStackView)
         containView.addSubview(habitTableView)
         containView.addSubview(buttonStackView)
-        containView.addSubview(collectionView)
+        containView.addSubview(emodjiCollectionView)
+        containView.addSubview(colorCollectionView)
         activateConstraints()
     }
 
@@ -281,6 +305,10 @@ final class CreateNewTrackerViewController: UIViewController {
         }
         currentViewController?.dismiss(animated: true)
     }
+
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        view.endEditing(true)
+    }
 }
 
 extension CreateNewTrackerViewController: UITextFieldDelegate {
@@ -325,24 +353,27 @@ extension CreateNewTrackerViewController: UpdateCellSubtitleDelegate {
 
 extension CreateNewTrackerViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.section == 0 {
-            if let selectedCellIndex = selectedIndexEmodjy {
-                let cell = collectionView.cellForItem(at: selectedCellIndex)
-                cell?.backgroundColor = .clear
+        if collectionView == emodjiCollectionView {
+            if let previousSelectedIndexPath = selectedIndexEmodjy {
+                collectionView.deselectItem(at: previousSelectedIndexPath, animated: false)
+                let previousSelectedCell = collectionView.cellForItem(at: previousSelectedIndexPath)
+                previousSelectedCell?.layer.cornerRadius = 0
+                previousSelectedCell?.backgroundColor = .clear
             }
             let cell = collectionView.cellForItem(at: indexPath)
-            cell?.layer.cornerRadius = 13
+            cell?.layer.cornerRadius = 16
             cell?.backgroundColor = .ypLightGray
             selectedIndexEmodjy = indexPath
             emodji = emodjies[indexPath.row]
-        } else if indexPath.section == 1 {
-            if let selectedCellIndex = selectedIndexColor {
-                let cell = collectionView.cellForItem(at: selectedCellIndex)
-                cell?.layer.borderWidth = 0
+        } else if collectionView == colorCollectionView {
+            if let previousSelectedIndexPath = selectedIndexColor {
+                collectionView.deselectItem(at: previousSelectedIndexPath, animated: false)
+                let previousSelectedCell = collectionView.cellForItem(at: previousSelectedIndexPath)
+                previousSelectedCell?.layer.borderWidth = 0
             }
             let cell = collectionView.cellForItem(at: indexPath)
             cell?.layer.borderWidth = 3
-            cell?.layer.cornerRadius = 13
+            cell?.layer.cornerRadius = 16
             let borderColor = colorSelection[indexPath.item].withAlphaComponent(0.3)
             cell?.layer.borderColor = borderColor.cgColor
             selectedIndexColor = indexPath
@@ -356,11 +387,6 @@ extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 52, height: 52)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
-                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
     }
 
     func collectionView(_ collectionView: UICollectionView,
@@ -382,27 +408,42 @@ extension CreateNewTrackerViewController: UICollectionViewDelegateFlowLayout {
 
 extension CreateNewTrackerViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 2
+        return 1
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? emodjies.count : (section == 1 ? colorSelection.count : 18)
+        if collectionView == emodjiCollectionView {
+            return emodjies.count
+        } else if collectionView == colorCollectionView {
+            return colorSelection.count
+        } else {
+            return 18
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:
-                                                                NewTrackerCollectionCell.reuseIdentifier,
-                                                            for: indexPath) as? NewTrackerCollectionCell
-        else {
+        if collectionView == emodjiCollectionView {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:
+                                                                    NewTrackerEmodjiCollectionCell.reuseIdentifier,
+                                                                for: indexPath) as? NewTrackerEmodjiCollectionCell
+            else {
+                return UICollectionViewCell()
+            }
+            cell.addEmodji(emodjies[indexPath.row])
+            return cell
+        } else if collectionView == colorCollectionView {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:
+                                                                    NewTrackerColorCollectionCell.reuseIdentifier,
+                                                                for: indexPath) as? NewTrackerColorCollectionCell
+            else {
+                return UICollectionViewCell()
+            }
+            cell.addColor(colorSelection[indexPath.row])
+            return cell
+        } else {
             return UICollectionViewCell()
         }
-        if indexPath.section == 0 {
-            cell.addEmodji(emodjies[indexPath.row])
-        } else {
-            cell.addColor(colorSelection[indexPath.row])
-        }
-        return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,
@@ -413,8 +454,11 @@ extension CreateNewTrackerViewController: UICollectionViewDataSource {
         else {
             return UICollectionReusableView()
         }
-        let header = collectionViewHeaders[indexPath.section]
-        view.addHeader(header)
+        if collectionView == emodjiCollectionView {
+                view.addHeader(collectionViewHeaders[0])
+            } else if collectionView == colorCollectionView {
+                view.addHeader(collectionViewHeaders[1])
+            }
         return view
     }
 }
