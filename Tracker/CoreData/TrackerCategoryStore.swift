@@ -11,6 +11,9 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
 
 protocol TrackerCategoryStoreDataProviderProtocol {
     func fetchTrackerCategory(for category: TrackerCategory) throws -> TrackerCategoryCD
+}
+
+protocol TrackerCategoryStoreProtocol {
     func getTrackerCategories() throws -> [TrackerCategory]
     func addTrackerCategory(_ category: TrackerCategory) throws
 }
@@ -99,7 +102,7 @@ private extension TrackerCategoryStore {
     }
 }
 
-extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol {
+extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, TrackerCategoryStoreProtocol {
 
     func fetchTrackerCategory(for category: TrackerCategory) throws -> TrackerCategoryCD {
         try fetchTrackerCategoryCoreData(for: category)

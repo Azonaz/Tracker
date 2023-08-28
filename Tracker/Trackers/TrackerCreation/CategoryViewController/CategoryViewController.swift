@@ -150,6 +150,7 @@ extension CategoryViewController: NewCategoryViewControllerDelegate {
         }
         getCategories()
         tableView.reloadData()
+        checkPlaceholder()
     }
 }
 

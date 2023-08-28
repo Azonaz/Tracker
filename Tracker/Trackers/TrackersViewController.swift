@@ -2,7 +2,7 @@ import UIKit
 
 class TrackersViewController: UIViewController {
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
-    private let trackerCategoryStore: TrackerCategoryStoreDataProviderProtocol = TrackerCategoryStore()
+    private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let trackerRecordStore: TrackerRecordStoreProtocol = TrackerRecordStore()
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
