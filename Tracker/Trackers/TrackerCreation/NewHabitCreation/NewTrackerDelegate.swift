@@ -18,8 +18,16 @@ final class NewTrackerDelegate: NSObject, UITableViewDelegate {
             let scheduleViewController = ScheduleViewController()
             scheduleViewController.delegate = viewController
             scheduleViewController.schedule = viewController.getSchedule()
-            scheduleViewController.selectedWeekdays = viewController.getSelectedWeekdays()
+            scheduleViewController.scheduleSelectedDays = viewController.getScheduleSelectedDays()
             presentViewController(for: scheduleViewController)
+        }
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: cell.bounds.size.width)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         }
     }
 

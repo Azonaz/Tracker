@@ -20,8 +20,8 @@ final class TrackerCollectionViewDataSourse: NSObject, UICollectionViewDataSourc
         guard
             let tracker = cellData?[indexPath.section].trackers[indexPath.row],
             let trackerCell = cell as? TrackerCollectionViewCell,
-            let isCompletedToday = viewController?.isTrackerDoneToday(id: tracker.id),
-            let completedDays = viewController?.getDoneTrackers().filter({
+            let isDoneToday = viewController?.isDoneTracker(id: tracker.id, tracker: tracker),
+            let doneDays = viewController?.getTrackersRecords(for: tracker).filter({
                 $0.id == tracker.id
             }).count
         else {
@@ -29,8 +29,8 @@ final class TrackerCollectionViewDataSourse: NSObject, UICollectionViewDataSourc
         }
         trackerCell.delegate = viewController
         trackerCell.configure(with: tracker,
-                              isCompletedToday: isCompletedToday,
-                              completedDays: completedDays,
+                              isDoneToday: isDoneToday,
+                              doneDays: doneDays,
                               at: indexPath)
         return trackerCell
     }
