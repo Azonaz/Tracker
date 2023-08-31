@@ -108,7 +108,10 @@ class TrackersViewController: UIViewController {
     }
 
     private func createNavigationBar() {
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
+        let spacer = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
+        spacer.width = 15
+        let addTrackerBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
+        navigationItem.leftBarButtonItems = [spacer, addTrackerBarButtonItem]
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.title = "Трекеры"
         navigationController?.navigationBar.backgroundColor = .ypWhite
