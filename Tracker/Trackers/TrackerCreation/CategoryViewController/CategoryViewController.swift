@@ -5,17 +5,15 @@ final class CategoryViewController: UIViewController {
     var selectedIndexPath: IndexPath?
     private let trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore()
     private var categoriesList: [TrackerCategory] = []
-    private var categoryTitle: String = ""
-    private var tableViewDelegate: CategoryViewDelegate?
-    private var tableViewDataSource: CategoryViewDataSource?
-
+    private var viewModel: CategoryViewModel
+    
     private lazy var placeholderImage: UIImageView = {
         let image = UIImageView()
         image.image = .emptyTrackers
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
-
+    
     private lazy var placeholderText: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -34,9 +32,9 @@ final class CategoryViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private lazy var placeholderStackView: UIStackView = {
-       let stackView = UIStackView()
+        let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 8
         stackView.alignment = .center
@@ -46,18 +44,18 @@ final class CategoryViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
-
+    
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.rowHeight = 75
         tableView.showsVerticalScrollIndicator = false
-        tableView.dataSource = tableViewDataSource
-        tableView.delegate = tableViewDelegate
+        tableView.dataSource = self
+        tableView.delegate = self
         tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
-
+    
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
@@ -69,15 +67,26 @@ final class CategoryViewController: UIViewController {
         return button
     }()
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        getCategories()
-        tableViewDataSource = CategoryViewDataSource(viewController: self)
-        tableViewDelegate = CategoryViewDelegate(viewController: self)
-        createView()
-        checkPlaceholder()
+    init() {
+        self.viewModel = CategoryViewModel(trackerCategoryStore: self.trackerCategoryStore)
+        super.init(nibName: nil, bundle: nil)
     }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel.categoriesDidChange = { [weak self] categories in
+            self?.categoriesList = categories
+            self?.checkPlaceholder()
+            self?.tableView.reloadData()
+        }
+        viewModel.getCategoriesList()
+        createView()
+    }
+    
     private func activateConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
@@ -92,7 +101,7 @@ final class CategoryViewController: UIViewController {
             addCategoryButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
-
+    
     private func createView() {
         view.backgroundColor = .ypWhite
         navigationItem.title = "Категория"
@@ -104,15 +113,7 @@ final class CategoryViewController: UIViewController {
         view.addSubview(addCategoryButton)
         activateConstraints()
     }
-
-    private func getCategories() {
-        do {
-            categoriesList = try trackerCategoryStore.getTrackerCategories()
-        } catch {
-            assertionFailure("Unable to get categories' list")
-        }
-    }
-
+    
     private func checkPlaceholder() {
         if categoriesList.isEmpty {
             placeholderStackView.isHidden = false
@@ -122,16 +123,7 @@ final class CategoryViewController: UIViewController {
             placeholderStackView.isHidden = true
         }
     }
-
-    func getCategoriesList() -> [TrackerCategory] {
-        categoriesList
-    }
-
-    func getCategoryTitle(_ title: String) -> String {
-        categoryTitle = title
-        return categoryTitle
-    }
-
+    
     @objc
     func tapAddButton() {
         let newCategoryViewController = NewCategoryViewController()
@@ -141,25 +133,48 @@ final class CategoryViewController: UIViewController {
     }
 }
 
-extension CategoryViewController: NewCategoryViewControllerDelegate {
-    func updateCategoriesList(with category: TrackerCategory) {
-        do {
-            try trackerCategoryStore.addTrackerCategory(category)
-        } catch {
-            assertionFailure("Unable to add category")
+extension CategoryViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedIndexPath.flatMap { tableView.cellForRow(at: $0) }?.accessoryType = .none
+        selectedIndexPath = indexPath
+        tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        let selectedCategory = viewModel.getCategory(at: indexPath)
+        delegate?.updateCategorySubtitle(with: selectedCategory.title, at: selectedIndexPath)
+        dismiss(animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: cell.bounds.size.width)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         }
-        getCategories()
-        tableView.reloadData()
-        checkPlaceholder()
     }
 }
 
-extension CategoryViewController: TrackerCategoryStoreDelegate {
-    func didUpdate(_ update: TrackerCategoryStoreUpdate) {
-        getCategories()
-        tableView.performBatchUpdates {
-            tableView.insertRows(at: update.insertedIndexPaths, with: .automatic)
-        }
-        tableView.reloadData()
+extension CategoryViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        categoriesList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseIdentifier, for: indexPath)
+        guard let categoryCell = cell as? CategoryCell else { return UITableViewCell() }
+        let category = viewModel.getCategory(at: indexPath)
+        let title = category.title
+        let isFirstRow = indexPath.row == 0
+        let isLastRow = indexPath.row == viewModel.numberOfCategories() - 1
+        let isSelected = indexPath == selectedIndexPath
+        categoryCell.configure(with: title,
+                               isFirstRow: isFirstRow,
+                               isLastRow: isLastRow,
+                               isSelected: isSelected)
+        return categoryCell
+    }
+}
+
+extension CategoryViewController: NewCategoryViewControllerDelegate {
+    func updateCategoriesList(with category: TrackerCategory) {
+        viewModel.addCategory(category)
     }
 }

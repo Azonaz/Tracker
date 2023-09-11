@@ -10,7 +10,7 @@ final class CreateNewTrackerViewController: UIViewController {
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
-    private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
+    let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let collectionViewHeaders = ["Emodji", "Цвет"]
     private var tableTitles: [String] = []
     private var isHabit: Bool

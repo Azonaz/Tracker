@@ -7,7 +7,6 @@ class TrackersViewController: UIViewController {
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var currentDate: Date?
-    private var delegate: TrackerCollectionViewDelegate?
     private var dataSourсe: TrackerCollectionViewDataSourse?
 
     private lazy var datePicker: UIDatePicker = {
@@ -43,7 +42,7 @@ class TrackersViewController: UIViewController {
         collectionView.allowsMultipleSelection = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.dataSource = dataSourсe
-        collectionView.delegate = delegate
+        collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
@@ -79,7 +78,6 @@ class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         dataSourсe = TrackerCollectionViewDataSourse(viewController: self)
-        delegate = TrackerCollectionViewDelegate(viewController: self)
         createView()
         reloadData()
     }
@@ -108,10 +106,7 @@ class TrackersViewController: UIViewController {
     }
 
     private func createNavigationBar() {
-        let spacer = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        spacer.width = 15
-        let addTrackerBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
-        navigationItem.leftBarButtonItems = [spacer, addTrackerBarButtonItem]
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.title = "Трекеры"
         navigationController?.navigationBar.backgroundColor = .ypWhite
@@ -279,6 +274,31 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
         } catch {
             return false
         }
+    }
+}
+
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let availableWidth = collectionView.frame.width - 37
+        let cellWidth = availableWidth / CGFloat(2)
+        let cellHeight: CGFloat = 148
+        return CGSize(width: cellWidth, height: cellHeight)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 12, left: 16, bottom: 16, right: 16)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 5
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 24)
     }
 }
 
