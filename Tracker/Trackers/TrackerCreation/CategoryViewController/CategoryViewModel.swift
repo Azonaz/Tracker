@@ -3,17 +3,13 @@ import Foundation
 class CategoryViewModel {
     var categoriesDidChange: (([TrackerCategory]) -> Void)?
 
-    private var categoriesList: [TrackerCategory] = [] {
+    private(set) var categoriesList: [TrackerCategory] = [] {
         didSet {
             categoriesDidChange?(categoriesList)
         }
     }
 
-    private let trackerCategoryStore: TrackerCategoryStore
-
-    init(trackerCategoryStore: TrackerCategoryStore) {
-        self.trackerCategoryStore = trackerCategoryStore
-    }
+    private let trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore()
 
     func addCategory(_ category: TrackerCategory) {
         do {
@@ -36,12 +32,7 @@ class CategoryViewModel {
         return categoriesList[indexPath.row]
     }
 
-    func numberOfCategories() -> Int {
-        return categoriesList.count
-    }
-
     func didUpdateCategories(_ update: TrackerCategoryStoreUpdate) {
-            getCategoriesList()
-            categoriesDidChange?(categoriesList)
-        }
+        categoriesDidChange?(categoriesList)
+    }
 }

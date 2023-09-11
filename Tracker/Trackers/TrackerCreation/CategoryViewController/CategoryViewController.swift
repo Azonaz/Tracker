@@ -3,17 +3,15 @@ import UIKit
 final class CategoryViewController: UIViewController {
     weak var delegate: UpdateCellSubtitleDelegate?
     var selectedIndexPath: IndexPath?
-    private let trackerCategoryStore: TrackerCategoryStore = TrackerCategoryStore()
-    private var categoriesList: [TrackerCategory] = []
-    private var viewModel: CategoryViewModel
-    
+    private var viewModel: CategoryViewModel = CategoryViewModel()
+
     private lazy var placeholderImage: UIImageView = {
         let image = UIImageView()
         image.image = .emptyTrackers
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
-    
+
     private lazy var placeholderText: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -32,7 +30,7 @@ final class CategoryViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     private lazy var placeholderStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -44,7 +42,7 @@ final class CategoryViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
-    
+
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.rowHeight = 75
@@ -55,7 +53,7 @@ final class CategoryViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
-    
+
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
@@ -67,26 +65,16 @@ final class CategoryViewController: UIViewController {
         return button
     }()
 
-    init() {
-        self.viewModel = CategoryViewModel(trackerCategoryStore: self.trackerCategoryStore)
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.categoriesDidChange = { [weak self] categories in
-            self?.categoriesList = categories
+        viewModel.categoriesDidChange = { [weak self] _ in
             self?.checkPlaceholder()
             self?.tableView.reloadData()
         }
         viewModel.getCategoriesList()
         createView()
     }
-    
+
     private func activateConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
@@ -101,7 +89,7 @@ final class CategoryViewController: UIViewController {
             addCategoryButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
-    
+
     private func createView() {
         view.backgroundColor = .ypWhite
         navigationItem.title = "Категория"
@@ -113,9 +101,9 @@ final class CategoryViewController: UIViewController {
         view.addSubview(addCategoryButton)
         activateConstraints()
     }
-    
+
     private func checkPlaceholder() {
-        if categoriesList.isEmpty {
+        if viewModel.categoriesList.isEmpty {
             placeholderStackView.isHidden = false
             tableView.isHidden = true
         } else {
@@ -123,7 +111,7 @@ final class CategoryViewController: UIViewController {
             placeholderStackView.isHidden = true
         }
     }
-    
+
     @objc
     func tapAddButton() {
         let newCategoryViewController = NewCategoryViewController()
@@ -142,7 +130,7 @@ extension CategoryViewController: UITableViewDelegate {
         delegate?.updateCategorySubtitle(with: selectedCategory.title, at: selectedIndexPath)
         dismiss(animated: true)
     }
-    
+
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: cell.bounds.size.width)
@@ -154,16 +142,16 @@ extension CategoryViewController: UITableViewDelegate {
 
 extension CategoryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        categoriesList.count
+        viewModel.categoriesList.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseIdentifier, for: indexPath)
         guard let categoryCell = cell as? CategoryCell else { return UITableViewCell() }
         let category = viewModel.getCategory(at: indexPath)
         let title = category.title
         let isFirstRow = indexPath.row == 0
-        let isLastRow = indexPath.row == viewModel.numberOfCategories() - 1
+        let isLastRow = indexPath.row == viewModel.categoriesList.count - 1
         let isSelected = indexPath == selectedIndexPath
         categoryCell.configure(with: title,
                                isFirstRow: isFirstRow,
