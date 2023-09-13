@@ -113,7 +113,7 @@ final class CategoryViewController: UIViewController {
     }
 
     @objc
-    func tapAddButton() {
+    private func tapAddButton() {
         let newCategoryViewController = NewCategoryViewController()
         newCategoryViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: newCategoryViewController)

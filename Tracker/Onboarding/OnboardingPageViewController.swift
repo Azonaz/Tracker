@@ -2,57 +2,11 @@ import UIKit
 
 final class OnboardingPageViewController: UIPageViewController {
     private lazy var pages: [UIViewController] = {
+        let firstPage = OnboardingViewController(pageImageView: .onboarding1,
+                                                 text: "Отслеживайте только то, что хотите")
+        let secondPage = OnboardingViewController(pageImageView: .onboarding2,
+                                                  text: "Даже если это не литры воды и йога")
         return [firstPage, secondPage]
-    }()
-
-    private lazy var firstPage: UIViewController = {
-        let controller = UIViewController()
-        let pageImage = UIImageView(frame: view.bounds)
-        pageImage.image = .onboarding1
-        pageImage.center = view.center
-        pageImage.contentMode = .scaleAspectFill
-        pageImage.clipsToBounds = true
-        controller.view.addSubview(pageImage)
-        controller.view.addSubview(firstLabel)
-        controller.view.sendSubviewToBack(pageImage)
-        return controller
-    }()
-
-    private lazy var secondPage: UIViewController = {
-        let controller = UIViewController()
-        let pageImage = UIImageView(frame: view.bounds)
-        pageImage.image = .onboarding2
-        pageImage.center = view.center
-        pageImage.contentMode = .scaleAspectFill
-        pageImage.clipsToBounds = true
-        controller.view.addSubview(pageImage)
-        controller.view.addSubview(secondLabel)
-        controller.view.sendSubviewToBack(pageImage)
-        return controller
-    }()
-
-    private lazy var firstLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Отслеживайте только то, что хотите"
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    private lazy var secondLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Даже если это не литры воды и йога"
-        label.textColor = .black
-        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
     }()
 
     private lazy var onButton: UIButton = {
@@ -95,14 +49,6 @@ final class OnboardingPageViewController: UIPageViewController {
 
     private func activateConstrants() {
         NSLayoutConstraint.activate([
-            firstLabel.leadingAnchor.constraint(equalTo: firstPage.view.leadingAnchor, constant: 16),
-            firstLabel.trailingAnchor.constraint(equalTo: firstPage.view.trailingAnchor, constant: -16),
-            firstLabel.bottomAnchor.constraint(equalTo: firstPage.view.safeAreaLayoutGuide.bottomAnchor,
-                                               constant: -280),
-            secondLabel.leadingAnchor.constraint(equalTo: secondPage.view.leadingAnchor, constant: 16),
-            secondLabel.trailingAnchor.constraint(equalTo: secondPage.view.trailingAnchor, constant: -16),
-            secondLabel.bottomAnchor.constraint(equalTo: secondPage.view.safeAreaLayoutGuide.bottomAnchor,
-                                                constant: -280),
             onButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             onButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             onButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
