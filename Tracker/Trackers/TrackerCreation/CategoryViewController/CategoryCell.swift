@@ -12,15 +12,12 @@ final class CategoryCell: UITableViewCell {
         layer.cornerRadius = 16
         selectionStyle = .none
         accessoryType = isSelected ? .checkmark : .none
-        separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         if isFirstRow && isLastRow {
             layer.cornerRadius = 16
-            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
         } else if isFirstRow {
             layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         } else if isLastRow {
             layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-            separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: bounds.width + 40)
         } else {
             layer.cornerRadius = 0
         }

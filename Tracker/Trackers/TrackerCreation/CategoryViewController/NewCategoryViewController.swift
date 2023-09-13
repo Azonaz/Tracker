@@ -12,6 +12,8 @@ final class NewCategoryViewController: UIViewController {
         textField.backgroundColor = .ypBackground
         textField.textColor = .ypBlack
         textField.clearButtonMode = .whileEditing
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
+        textField.leftViewMode = .always
         let attributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
         textField.attributedPlaceholder = NSAttributedString(string: "Введите название категории",
                                                              attributes: attributes)
@@ -90,7 +92,7 @@ extension NewCategoryViewController: UITextFieldDelegate {
                    replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.count + string.count - range.length
-        if newLength >= 3 && newLength <= 38 {
+        if newLength >= 1 && newLength <= 38 {
             addButton.isEnabled = true
             addButton.backgroundColor = .ypBlack
         } else {

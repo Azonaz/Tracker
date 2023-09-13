@@ -21,7 +21,7 @@ enum Weekday: String, CaseIterable {
         }
     }
 
-    var weekdayNumber: Int {
+    var weekdayInNumber: Int {
         switch self {
         case .monday: return 2
         case .tuesday: return 3
