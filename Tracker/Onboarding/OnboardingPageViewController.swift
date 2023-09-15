@@ -2,10 +2,8 @@ import UIKit
 
 final class OnboardingPageViewController: UIPageViewController {
     private lazy var pages: [UIViewController] = {
-        let firstPage = OnboardingViewController(pageImageView: .onboarding1,
-                                                 text: "Отслеживайте только то, что хотите")
-        let secondPage = OnboardingViewController(pageImageView: .onboarding2,
-                                                  text: "Даже если это не литры воды и йога")
+        let firstPage = OnboardingViewController(pageImageView: .onboarding1, text: firstPageOnboardingText)
+        let secondPage = OnboardingViewController(pageImageView: .onboarding2, text: secondPageOnboardingText)
         return [firstPage, secondPage]
     }()
 
@@ -14,7 +12,7 @@ final class OnboardingPageViewController: UIPageViewController {
         button.layer.cornerRadius = 16
         button.backgroundColor = .black
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(onboardingButtonText, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(tapOnButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false

@@ -15,8 +15,8 @@ final class NewCategoryViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
         let attributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
-        textField.attributedPlaceholder = NSAttributedString(string: "Введите название категории",
-                                                             attributes: attributes)
+        textField.attributedPlaceholder =
+        NSAttributedString(string: newCategoryTextBarPlaceholderText, attributes: attributes)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.delegate = self
@@ -26,7 +26,7 @@ final class NewCategoryViewController: UIViewController {
 
     private let addButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(readyButtonText, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -58,7 +58,7 @@ final class NewCategoryViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Новая категория"
+        navigationItem.title = newCategoryText
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true

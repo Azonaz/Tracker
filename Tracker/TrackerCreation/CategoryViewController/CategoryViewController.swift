@@ -20,10 +20,7 @@ final class CategoryViewController: UIViewController {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = 8
         paragraphStyle.alignment = .center
-        let attributedText = NSMutableAttributedString(string: """
-                                                               Привычки и события можно
-                                                               объединить по смыслу
-                                                               """)
+        let attributedText = NSMutableAttributedString(string: categoryPlaceholderText)
         attributedText.addAttribute(.paragraphStyle, value: paragraphStyle,
                                     range: NSRange(location: 0, length: attributedText.length))
         label.attributedText = attributedText
@@ -56,7 +53,7 @@ final class CategoryViewController: UIViewController {
 
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(addCategoryButtonText, for: .normal)
         button.backgroundColor = .ypBlack
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
@@ -92,7 +89,7 @@ final class CategoryViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Категория"
+        navigationItem.title = headerCategory
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true

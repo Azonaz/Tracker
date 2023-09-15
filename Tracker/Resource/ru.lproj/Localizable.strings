@@ -1,0 +1,43 @@
+// Onboarding
+"firstPageText" = "Отслеживайте только то, что хотите";
+"secondPageText" = "Даже если это не литры воды и йога";
+"onboardingButton" = "Вот это технология!";
+
+// TabBar
+"trackers" = "Трекеры";
+"statistic" = "Статистика";
+
+// TrackersViewController
+"trackersPlaceholderText" = "Что будем отслеживать?";
+"notFoundedTrackersPlaceholderText" = "Ничего не найдено";
+"searchBarPlaceholder" = "Поиск";
+
+// TrackerTypeViewController
+"habitButton" = "Привычка";
+"eventButton" = "Нерегулярное событие";
+"trackerCreate" = "Создание трекера";
+
+// CreateNewTrackerViewController
+"collectionViewEmodji" = "Emodji";
+"collectionViewColor" = "Цвет";
+"category" = "Категория";
+"schedule" = "Расписание";
+"newTrackerTextBarPlaceholder" = "Введите название трекера";
+"errorLabel" = "Ограничение 38 символов";
+"cancelButton" = "Отменить";
+"createButton" = "Создать";
+"everyDay" = "Каждый день";
+"newHabbit" = "Новая привычка";
+"newEvent" = "Новое нерегулярное событие";
+
+// CategoryViewController
+"categoryPlaceholder" = "Привычки и события можно объединить по смыслу";
+"addCategory" = "Добавить категорию";
+
+// NewCategoryViewController
+"newCategoryTextPlaceholder" = "Введите название категории";
+"newCategory" = "Новая категория";
+"readyButton" = "Готово";
+
+// StatisticViewController
+"statisticPlaceholder" = "Анализировать пока нечего";

@@ -58,7 +58,7 @@ class TrackersViewController: UIViewController {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
-        label.text = "Что будем отслеживать?"
+        label.text = trackersPlaceholderText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -108,7 +108,7 @@ class TrackersViewController: UIViewController {
     private func createNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        navigationItem.title = "Трекеры"
+        navigationItem.title = trackersTabTitile
         navigationController?.navigationBar.backgroundColor = .ypWhite
         navigationController?.navigationBar.prefersLargeTitles = true
     }
@@ -149,7 +149,7 @@ class TrackersViewController: UIViewController {
     private func updatePlaceholder() {
         if !categories.isEmpty && visibleCategories.isEmpty {
             placeholderImage.image = .notFounded
-            placeholderText.text = "Ничего не найдено"
+            placeholderText.text = notFoundedTrackersPlaceholderText
             placeholderStackView.isHidden = false
             collectionView.isHidden = true
         } else if categories.isEmpty {

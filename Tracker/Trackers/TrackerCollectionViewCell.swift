@@ -156,17 +156,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     private func getDaysText(_ doneDays: Int) -> String {
-        let lastTwoDayDigits = doneDays % 100
-        let lastDayDigit = doneDays % 10
-        if lastTwoDayDigits >= 11 && lastTwoDayDigits <= 19 {
-            return "\(doneDays) дней"
-        } else if lastDayDigit == 1 {
-            return "\(doneDays) день"
-        } else if lastDayDigit >= 2 && lastDayDigit <= 4 {
-            return "\(doneDays) дня"
-        } else {
-            return "\(doneDays) дней"
-        }
+        let formatDaysString: String = NSLocalizedString("daysAmount", comment: "")
+        let resultDaysString: String = String.localizedStringWithFormat(formatDaysString, doneDays)
+        return resultDaysString
     }
 
     private func checkDoneToday() {

@@ -15,7 +15,7 @@ final class TrackerSearchTextBar: UISearchBar {
         searchBarStyle = .minimal
         returnKeyType = .go
         searchTextField.clearButtonMode = .never
-        placeholder = "Поиск"
+        placeholder = searchBarPlaceholderText
         translatesAutoresizingMaskIntoConstraints = false
     }
 }

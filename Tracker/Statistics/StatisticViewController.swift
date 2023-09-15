@@ -13,7 +13,7 @@ final class StatisticViewController: UIViewController {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
-        label.text = "Анализировать пока нечего"
+        label.text = statisticPlaceholderText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -37,7 +37,7 @@ final class StatisticViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        title = "Статистика"
+        title = NSLocalizedString("statistic", comment: "")
         navigationController?.navigationBar.backgroundColor = .ypWhite
         navigationController?.navigationBar.prefersLargeTitles = true
         view.addSubview(placeholderStackView)

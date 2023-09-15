@@ -15,12 +15,12 @@ final class TabBarController: UITabBarController {
         tabBar.addSubview(borderLine)
         let trackerViewController = TrackersViewController()
         let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
-        trackerNavigationController.tabBarItem = UITabBarItem(title: "Трекеры",
+        trackerNavigationController.tabBarItem = UITabBarItem(title: trackersTabTitile,
                                                               image: .tabTracker,
                                                               tag: 0)
         let staticticViewController = StatisticViewController()
         let statisticNavigationController = UINavigationController(rootViewController: staticticViewController)
-        statisticNavigationController.tabBarItem = UITabBarItem(title: "Статистика",
+        statisticNavigationController.tabBarItem = UITabBarItem(title: statisticTabTitile,
                                                                 image: .tabStatistic,
                                                                 tag: 1)
         self.viewControllers = [trackerNavigationController, statisticNavigationController]

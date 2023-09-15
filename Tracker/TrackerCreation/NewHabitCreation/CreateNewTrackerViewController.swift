@@ -11,11 +11,11 @@ final class CreateNewTrackerViewController: UIViewController {
     var indexCategory: IndexPath?
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
     let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
-    private let collectionViewHeaders = ["Emodji", "Цвет"]
+    private let collectionViewHeaders = [headerCollectionViewEmodji, headerCollectionViewColor]
     private var tableTitles: [String] = []
     private var isHabit: Bool
     private lazy var titleCells: [String] = {
-        isHabit ? ["Категория", "Расписание"] : ["Категория"]
+        isHabit ? [headerCategory, headerSchedule] : [headerCategory]
     }()
     private var trackerTitle: String = ""
     private var categorySubtitle: String = ""
@@ -52,7 +52,8 @@ final class CreateNewTrackerViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
         let attribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
-        textField.attributedPlaceholder = NSAttributedString(string: "Введите название трекера", attributes: attribute)
+        textField.attributedPlaceholder = NSAttributedString(string: newTrackerTextBarPlaceholderText,
+                                                             attributes: attribute)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.delegate = self
@@ -64,7 +65,7 @@ final class CreateNewTrackerViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         label.textColor = .ypRed
         label.isHidden = true
-        label.text = "Ограничение 38 символов"
+        label.text = errorLabelText
         label.textAlignment = .center
         return label
     }()
@@ -130,7 +131,7 @@ final class CreateNewTrackerViewController: UIViewController {
         button.layer.borderWidth = 1
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.ypRed, for: .normal)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(cancelButtonText, for: .normal)
         button.layer.borderColor = UIColor.ypRed.cgColor
         button.addTarget(self, action: #selector(tapCancelButton), for: .touchUpInside)
         return button
@@ -142,7 +143,7 @@ final class CreateNewTrackerViewController: UIViewController {
         button.backgroundColor = .ypGray
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.ypWhite, for: .normal)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(createButtonText, for: .normal)
         button.isEnabled = false
         button.addTarget(self, action: #selector(tapCreateButton), for: .touchUpInside)
         return button
@@ -197,7 +198,7 @@ final class CreateNewTrackerViewController: UIViewController {
 
     func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
         if scheduleSelectedDays == Weekday.allCases {
-            return "Каждый день"
+            return everyDayText
         } else {
             return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
         }
@@ -243,7 +244,7 @@ final class CreateNewTrackerViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = isHabit ? "Новая привычка" : "Новое нерегулярное событие"
+        navigationItem.title = isHabit ? newHabbitText : newEventText
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
