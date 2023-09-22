@@ -5,6 +5,7 @@ protocol TrackerRecordStoreProtocol {
     func fetchTrackerRecords(for tracker: Tracker) throws -> [TrackerRecord]
     func addTrackerRecord(for id: UUID, by date: Date) throws
     func deleteTrackerRecord(for id: UUID, by date: Date) throws
+    func doneTrackersCount() -> Int
 }
 
 final class TrackerRecordStore: NSObject {
@@ -91,5 +92,15 @@ extension TrackerRecordStore: TrackerRecordStoreProtocol {
 
     func deleteTrackerRecord(for id: UUID, by date: Date) throws {
         try deleteTrackerRecord(id: id, date: date)
+    }
+
+    func doneTrackersCount() -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCD> = TrackerRecordCD.fetchRequest()
+        do {
+            let doneTrackers = try context.fetch(fetchRequest)
+            return doneTrackers.count
+        } catch {
+            return 0
+        }
     }
 }

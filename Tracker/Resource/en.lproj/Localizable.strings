@@ -41,6 +41,10 @@
 
 // StatisticViewController
 "statisticPlaceholder" = "There is nothing to analyze yet";
+"bestPeriod" = "Best period";
+"perfectDays" = "Ideal days";
+"trackersСompleted" = "Trackers completed";
+"averageValue" = "Average value";
 
 // Weekday
 "monday" = "Monday";

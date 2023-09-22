@@ -1,12 +1,12 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         addTabBarController()
     }
-    
+
     func addTabBarController() {
         tabBar.backgroundColor = .ypWhite
         tabBar.barTintColor = .ypBlue

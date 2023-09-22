@@ -41,6 +41,10 @@
 
 // StatisticViewController
 "statisticPlaceholder" = "Анализировать пока нечего";
+"bestPeriod" = "Лучший период";
+"perfectDays" = "Идеальные дни";
+"trackersСompleted" = "Трекеров завершено";
+"averageValue" = "Среднее значение";
 
 // Weekday
 "monday" = "Понедельник";
