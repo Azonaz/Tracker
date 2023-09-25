@@ -11,6 +11,13 @@
 "trackersPlaceholderText" = "Что будем отслеживать?";
 "notFoundedTrackersPlaceholderText" = "Ничего не найдено";
 "searchBarPlaceholder" = "Поиск";
+"filters" = "Фильтры";
+
+// FiltersViewController
+"allTrackers" = "Все трекеры";
+"todayTrackers" = "Трекеры на сегодня";
+"doneTrackers" = "Завершенные";
+"undoneTrackers" = "Не завершенные";
 
 // TrackerTypeViewController
 "habitButton" = "Привычка";

@@ -11,6 +11,13 @@
 "trackersPlaceholderText" = "What will we track?";
 "notFoundedTrackersPlaceholderText" = "Nothing found";
 "searchBarPlaceholder" = "Search";
+"filters" = "Filters";
+
+// FiltersViewController
+"allTrackers" = "All trackers";
+"todayTrackers" = "Trackers for today";
+"doneTrackers" = "Completed";
+"undoneTrackers" = "Not completed";
 
 // TrackerTypeViewController
 "habitButton" = "Habit";

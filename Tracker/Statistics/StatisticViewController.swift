@@ -2,10 +2,7 @@ import UIKit
 
 final class StatisticViewController: UIViewController {
 
-    let descriptions = ["bestPeriod",
-                        "perfectDays",
-                        "trackersСompleted",
-                        "averageValue"]
+    let descriptions = ["bestPeriod", "perfectDays", "trackersСompleted", "averageValue"]
     private let trackerRecordStore: TrackerRecordStoreProtocol = TrackerRecordStore()
 
     private lazy var statisticCardStackView: UIStackView = {

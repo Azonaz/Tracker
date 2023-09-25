@@ -52,6 +52,8 @@
 		84E3A3322A73E3C500030BDF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84E3A3302A73E3C500030BDF /* LaunchScreen.storyboard */; };
 		84E40DDA2A9C782A00E9108D /* NewTrackerColorCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E40DD92A9C782A00E9108D /* NewTrackerColorCollectionCell.swift */; };
 		84EFAF532A7BD42C0005F93F /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EFAF522A7BD42C0005F93F /* CategoryCell.swift */; };
+		84F75A4D2ABEA4F900FD5E41 /* FiltersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F75A4C2ABEA4F900FD5E41 /* FiltersViewController.swift */; };
+		84F75A4F2ABEE35300FD5E41 /* FilterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F75A4E2ABEE35300FD5E41 /* FilterCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +107,8 @@
 		84E3A3332A73E3C500030BDF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84E40DD92A9C782A00E9108D /* NewTrackerColorCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTrackerColorCollectionCell.swift; sourceTree = "<group>"; };
 		84EFAF522A7BD42C0005F93F /* CategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
+		84F75A4C2ABEA4F900FD5E41 /* FiltersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiltersViewController.swift; sourceTree = "<group>"; };
+		84F75A4E2ABEE35300FD5E41 /* FilterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +226,8 @@
 				84CA63F72A79088E00A804E1 /* SupplementaryView.swift */,
 				846A109C2A82291F00432492 /* TrackerCollectionViewDataSourse.swift */,
 				846A10A02A822C4700432492 /* TrackerSearchTextBar.swift */,
+				84F75A4C2ABEA4F900FD5E41 /* FiltersViewController.swift */,
+				84F75A4E2ABEE35300FD5E41 /* FilterCell.swift */,
 			);
 			path = Trackers;
 			sourceTree = "<group>";
@@ -397,10 +403,12 @@
 				84E3A32A2A73E3C400030BDF /* TrackersViewController.swift in Sources */,
 				84E3A3262A73E3C400030BDF /* AppDelegate.swift in Sources */,
 				84CA63FB2A793B5100A804E1 /* TrackerTypeViewController.swift in Sources */,
+				84F75A4F2ABEE35300FD5E41 /* FilterCell.swift in Sources */,
 				84E3A3282A73E3C400030BDF /* SceneDelegate.swift in Sources */,
 				84DAC7F72AB1A41000BC1982 /* OnboardingViewController.swift in Sources */,
 				84C792032ABC65A700C76B5B /* StatisticCardView.swift in Sources */,
 				84C792052ABC7A9300C76B5B /* Array+Extensions.swift in Sources */,
+				84F75A4D2ABEA4F900FD5E41 /* FiltersViewController.swift in Sources */,
 				84DE06AE2A9F5C3B00CBA6F6 /* OnboardingPageViewController.swift in Sources */,
 				84DBE1DD2A8B7E9B00A1557C /* NewTrackerCollectionHeader.swift in Sources */,
 				84E40DDA2A9C782A00E9108D /* NewTrackerColorCollectionCell.swift in Sources */,

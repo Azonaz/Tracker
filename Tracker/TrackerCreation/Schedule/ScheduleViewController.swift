@@ -61,8 +61,6 @@ final class ScheduleViewController: UIViewController {
 
     func getWeekdays() -> [String] {
         return Weekday.allCases.map { $0.weekdayFullName }
-//        let daysList: [Weekday] = Weekday.allCases
-//        return daysList
     }
 
     @objc

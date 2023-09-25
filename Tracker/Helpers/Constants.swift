@@ -23,6 +23,13 @@ let statisticTabTitile = NSLocalizedString("statistic", comment: "")
 let trackersPlaceholderText = NSLocalizedString("trackersPlaceholderText", comment: "")
 let notFoundedTrackersPlaceholderText = NSLocalizedString("notFoundedTrackersPlaceholderText", comment: "")
 let searchBarPlaceholderText = NSLocalizedString("searchBarPlaceholder", comment: "")
+let filtersText = NSLocalizedString("filters", comment: "")
+
+// FiltersViewController
+let allTrackerFilter = NSLocalizedString("allTrackers", comment: "")
+let todayTrackerFilter = NSLocalizedString("todayTrackers", comment: "")
+let doneTrackerFilter = NSLocalizedString("doneTrackers", comment: "")
+let undoneTrackerFilter = NSLocalizedString("undoneTrackers", comment: "")
 
 // TrackerTypeViewController
 let habitButtonText = NSLocalizedString("habitButton", comment: "")

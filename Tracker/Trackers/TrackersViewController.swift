@@ -75,6 +75,18 @@ class TrackersViewController: UIViewController {
         return stackView
     }()
 
+    private lazy var filterButton: UIButton = {
+       let button = UIButton()
+        button.layer.cornerRadius = 16
+        button.backgroundColor = .ypBlue
+        button.setTitle(filtersText, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        button.setTitleColor(.white, for: .normal)
+        button.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         dataSourсe = TrackerCollectionViewDataSourse(viewController: self)
@@ -103,6 +115,7 @@ class TrackersViewController: UIViewController {
         createSearchTextField()
         createTrackersCollectionView()
         createPlaceholderView()
+        createFilterButton()
     }
 
     private func createNavigationBar() {
@@ -143,6 +156,16 @@ class TrackersViewController: UIViewController {
         NSLayoutConstraint.activate([
             placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+
+    private func createFilterButton() {
+        view.addSubview(filterButton)
+        NSLayoutConstraint.activate([
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
+            filterButton.widthAnchor.constraint(equalToConstant: 114)
         ])
     }
 
@@ -219,6 +242,14 @@ class TrackersViewController: UIViewController {
     @objc
     private func handleTap() {
         view.endEditing(true)
+    }
+
+    @objc
+    private func tapFilterButton() {
+        let filtersViewController = FiltersViewController()
+        filtersViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: filtersViewController)
+        present(navigationController, animated: true)
     }
 }
 
