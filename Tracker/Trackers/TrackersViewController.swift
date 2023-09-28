@@ -1,6 +1,7 @@
 import UIKit
 
 class TrackersViewController: UIViewController {
+    var filterIndex: IndexPath?
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
     private let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let trackerRecordStore: TrackerRecordStoreProtocol = TrackerRecordStore()
@@ -174,12 +175,15 @@ class TrackersViewController: UIViewController {
             placeholderImage.image = .notFounded
             placeholderText.text = notFoundedTrackersPlaceholderText
             placeholderStackView.isHidden = false
+            filterButton.isHidden = true
             collectionView.isHidden = true
         } else if categories.isEmpty {
             placeholderStackView.isHidden = false
+            filterButton.isHidden = true
         } else {
             placeholderStackView.isHidden = true
             collectionView.isHidden = false
+            filterButton.isHidden = false
         }
         placeholderStackView.isHidden = !visibleCategories.isEmpty
     }
@@ -248,6 +252,7 @@ class TrackersViewController: UIViewController {
     private func tapFilterButton() {
         let filtersViewController = FiltersViewController()
         filtersViewController.delegate = self
+        filtersViewController.selectedFilterIndexPath = filterIndex
         let navigationController = UINavigationController(rootViewController: filtersViewController)
         present(navigationController, animated: true)
     }
@@ -339,5 +344,63 @@ extension TrackersViewController: TrackerStoreDelegate {
             collectionView.insertSections(update.insertedSections)
             collectionView.insertItems(at: update.insertedIndexPaths)
         }
+    }
+}
+
+extension TrackersViewController: FiltersViewControllerDelegate {
+    func selectFilter(at indexPath: IndexPath) {
+        filterIndex = indexPath
+        let selectedFilter = indexPath.row
+        switch selectedFilter {
+        case 0:
+            filterAllTrackers()
+        case 1:
+            filterTodayTrackers()
+        case 2:
+            filterDoneTrackers()
+        case 3:
+            filterUndoneTrackers()
+        default:
+            break
+        }
+    }
+
+    private func filterAllTrackers() {
+        reloadVisibleCategories()
+    }
+
+    private func filterTodayTrackers() {
+        datePicker.date = Date()
+        changeDatePicker()
+    }
+
+    private func filterDoneTrackers() {
+        let selectedDate = datePicker.date
+        let filteredCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                let isDone = isDoneTracker(id: tracker.id, tracker: tracker)
+                let dateMatches = Calendar.current.isDate(selectedDate, inSameDayAs: datePicker.date)
+                return isDone && dateMatches
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
+        visibleCategories = filteredCategories
+        updatePlaceholder()
+        collectionView.reloadData()
+    }
+
+    private func filterUndoneTrackers() {
+        let selectedDate = datePicker.date
+        let filteredCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                let isDone = isDoneTracker(id: tracker.id, tracker: tracker)
+                let dateMatches = Calendar.current.isDate(selectedDate, inSameDayAs: datePicker.date)
+                return !isDone && dateMatches
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
+        visibleCategories = filteredCategories
+        updatePlaceholder()
+        collectionView.reloadData()
     }
 }

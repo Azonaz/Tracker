@@ -1,7 +1,11 @@
 import UIKit
 
+protocol FiltersViewControllerDelegate: AnyObject {
+    func selectFilter(at indexPath: IndexPath)
+}
+
 final class FiltersViewController: UIViewController {
-    weak var delegate: TrackersViewController?
+    weak var delegate: FiltersViewControllerDelegate?
     var selectedFilterIndexPath: IndexPath?
 
     private let filters = [allTrackerFilter, todayTrackerFilter, doneTrackerFilter, undoneTrackerFilter]
@@ -47,6 +51,8 @@ extension FiltersViewController: UITableViewDelegate {
         selectedFilterIndexPath.flatMap { tableView.cellForRow(at: $0) }?.accessoryType = .none
         selectedFilterIndexPath = indexPath
         tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        guard let selectedIndexPath = selectedFilterIndexPath else { return }
+        delegate?.selectFilter(at: selectedIndexPath)
         dismiss(animated: true)
     }
 

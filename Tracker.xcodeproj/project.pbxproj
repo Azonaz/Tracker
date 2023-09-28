@@ -226,8 +226,7 @@
 				84CA63F72A79088E00A804E1 /* SupplementaryView.swift */,
 				846A109C2A82291F00432492 /* TrackerCollectionViewDataSourse.swift */,
 				846A10A02A822C4700432492 /* TrackerSearchTextBar.swift */,
-				84F75A4C2ABEA4F900FD5E41 /* FiltersViewController.swift */,
-				84F75A4E2ABEE35300FD5E41 /* FilterCell.swift */,
+				84EB371F2AC187C7008CF361 /* Flilters */,
 			);
 			path = Trackers;
 			sourceTree = "<group>";
@@ -295,6 +294,15 @@
 				84DBE1DC2A8B7E9B00A1557C /* NewTrackerCollectionHeader.swift */,
 			);
 			path = EmodjiColorCollection;
+			sourceTree = "<group>";
+		};
+		84EB371F2AC187C7008CF361 /* Flilters */ = {
+			isa = PBXGroup;
+			children = (
+				84F75A4C2ABEA4F900FD5E41 /* FiltersViewController.swift */,
+				84F75A4E2ABEE35300FD5E41 /* FilterCell.swift */,
+			);
+			path = Flilters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

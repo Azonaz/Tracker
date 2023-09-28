@@ -100,6 +100,10 @@ private extension TrackerCategoryStore {
         categoryCD.trackers = NSSet()
         try context.save()
     }
+
+    func deleteTrackerCategory(at indexPath: IndexPath) {
+        fetchedResultsController.managedObjectContext.delete(fetchedResultsController.object(at: indexPath))
+    }
 }
 
 extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, TrackerCategoryStoreProtocol {
