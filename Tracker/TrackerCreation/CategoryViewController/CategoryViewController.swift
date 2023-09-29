@@ -65,6 +65,7 @@ final class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.categoriesDidChange = { [weak self] _ in
+          //  print("Categories did change. New data: \(self?.viewModel.categoriesList ?? [])")
             self?.checkPlaceholder()
             self?.tableView.reloadData()
         }
@@ -109,6 +110,25 @@ final class CategoryViewController: UIViewController {
         }
     }
 
+    func alertForDeletingCategory(at indexPath: IndexPath) {
+        let alert = UIAlertController(title: categoryDeleteAlertText, message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: deleteText, style: .destructive) { _ in
+            self.viewModel.deleteCategory(at: indexPath)
+        }
+        let cancelAction = UIAlertAction(title: cancelButtonText, style: .cancel)
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true)
+    }
+
+    func openEditCategory(category: TrackerCategory) {
+        let newCategoryViewController = NewCategoryViewController()
+        newCategoryViewController.delegate = self
+        newCategoryViewController.categoryToEdit = category
+        let navigationController = UINavigationController(rootViewController: newCategoryViewController)
+        self.present(navigationController, animated: true)
+    }
+
     @objc
     private func tapAddButton() {
         let newCategoryViewController = NewCategoryViewController()
@@ -133,6 +153,21 @@ extension CategoryViewController: UITableViewDelegate {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: cell.bounds.size.width)
         } else {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    }
+
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
+        selectedIndexPath = indexPath
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let deleteAction = UIAction(title: deleteText, image: nil) { _ in
+                self.alertForDeletingCategory(at: indexPath)
+            }
+            deleteAction.attributes = [.destructive]
+            return UIMenu(title: "", children: [UIAction(title: editText, image: nil) { _ in
+                self.openEditCategory(category: self.viewModel.getCategory(at: indexPath))
+            },
+                                                deleteAction])
         }
     }
 }
@@ -161,5 +196,11 @@ extension CategoryViewController: UITableViewDataSource {
 extension CategoryViewController: NewCategoryViewControllerDelegate {
     func updateCategoriesList(with category: TrackerCategory) {
         viewModel.addCategory(category)
+    }
+
+    func editCategory(with newTitle: String) {
+        if let indexPath = selectedIndexPath {
+            viewModel.editCategory(at: indexPath, with: newTitle)
+        }
     }
 }

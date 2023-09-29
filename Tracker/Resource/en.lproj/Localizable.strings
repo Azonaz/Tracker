@@ -40,6 +40,9 @@
 // CategoryViewController
 "categoryPlaceholder" = "Habits and events can be combined by meaning";
 "addCategory" = "Add category";
+"editCategory" = "Edit";
+"deleteCategory" = "Delete";
+"categoryDeleteAlert" = "Are you sure this category is not needed?";
 
 // NewCategoryViewController
 "newCategoryTextPlaceholder" = "Enter category name";

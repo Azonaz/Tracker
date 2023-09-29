@@ -2,10 +2,12 @@ import UIKit
 
 protocol NewCategoryViewControllerDelegate: AnyObject {
     func updateCategoriesList(with category: TrackerCategory)
+    func editCategory(with newTitle: String)
 }
 
 final class NewCategoryViewController: UIViewController {
     weak var delegate: NewCategoryViewControllerDelegate?
+    var categoryToEdit: TrackerCategory?
 
     private lazy var newCategoryTextField: UITextField = {
         let textField = UITextField()
@@ -37,9 +39,15 @@ final class NewCategoryViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let category = categoryToEdit {
+                newCategoryTextField.text = category.title
+                addButton.isEnabled = true
+                addButton.backgroundColor = .ypBlack
+            } else {
+                addButton.isEnabled = false
+                addButton.backgroundColor = .ypGray
+            }
         newCategoryTextField.delegate = self
-        addButton.isEnabled = false
-        addButton.backgroundColor = .ypGray
         createView()
     }
 
@@ -70,10 +78,14 @@ final class NewCategoryViewController: UIViewController {
     @objc
     private func tapAddButton() {
         if let text = newCategoryTextField.text, !text.isEmpty {
-            let category = TrackerCategory(title: text, trackers: [])
-            delegate?.updateCategoriesList(with: category)
+            if categoryToEdit != nil {
+                delegate?.editCategory(with: text)
+            } else {
+                let category = TrackerCategory(title: text, trackers: [])
+                delegate?.updateCategoriesList(with: category)
+            }
+            dismiss(animated: true)
         }
-        dismiss(animated: true)
     }
 }
 

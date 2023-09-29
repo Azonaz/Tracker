@@ -40,6 +40,9 @@
 // CategoryViewController
 "categoryPlaceholder" = "Привычки и события можно объединить по смыслу";
 "addCategory" = "Добавить категорию";
+"editCategory" = "Редактировать";
+"deleteCategory" = "Удалить";
+"categoryDeleteAlert" = "Эта категория точно не нужна?";
 
 // NewCategoryViewController
 "newCategoryTextPlaceholder" = "Введите название категории";

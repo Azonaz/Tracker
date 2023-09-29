@@ -52,6 +52,9 @@ let newEventText = NSLocalizedString("newEvent", comment: "")
 // CategoryViewController
 let categoryPlaceholderText = NSLocalizedString("categoryPlaceholder", comment: "")
 let addCategoryButtonText = NSLocalizedString("addCategory", comment: "")
+let editText = NSLocalizedString("editCategory", comment: "")
+let deleteText = NSLocalizedString("deleteCategory", comment: "")
+let categoryDeleteAlertText = NSLocalizedString("categoryDeleteAlert", comment: "")
 
 // NewCategoryViewController
 let newCategoryTextBarPlaceholderText = NSLocalizedString("newCategoryTextPlaceholder", comment: "")

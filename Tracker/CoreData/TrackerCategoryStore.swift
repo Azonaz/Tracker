@@ -16,6 +16,8 @@ protocol TrackerCategoryStoreDataProviderProtocol {
 protocol TrackerCategoryStoreProtocol {
     func getTrackerCategories() throws -> [TrackerCategory]
     func addTrackerCategory(_ category: TrackerCategory) throws
+    func editTrackerCategory(_ category: TrackerCategory, with newTitle: String) throws
+    func deleteTrackerCategory(_ category: TrackerCategory)
 }
 
 final class TrackerCategoryStore: NSObject {
@@ -101,8 +103,22 @@ private extension TrackerCategoryStore {
         try context.save()
     }
 
-    func deleteTrackerCategory(at indexPath: IndexPath) {
-        fetchedResultsController.managedObjectContext.delete(fetchedResultsController.object(at: indexPath))
+    func deleteSelectedTrackerCategory(_ category: TrackerCategory) throws {
+        request.predicate = NSPredicate(format: "title == %@", category.title)
+        guard let categoryCD = try context.fetch(request).first else {
+            throw StoreError.fetchError
+        }
+        context.delete(categoryCD)
+        try context.save()
+    }
+
+    func editTrackerCategoryCD(for oldCategory: TrackerCategory, with newTitle: String) throws {
+        request.predicate = NSPredicate(format: "title == %@", oldCategory.title)
+        guard let categoryCD = try context.fetch(request).first else {
+            throw StoreError.fetchError
+        }
+        categoryCD.title = newTitle
+        try context.save()
     }
 }
 
@@ -118,6 +134,14 @@ extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, Tracke
 
     func addTrackerCategory(_ category: TrackerCategory) throws {
         try addNewTrackerCategory(category)
+    }
+
+    func deleteTrackerCategory(_ category: TrackerCategory) {
+        try? deleteSelectedTrackerCategory(category)
+    }
+
+    func editTrackerCategory(_ oldCategory: TrackerCategory, with newTitle: String) throws {
+        try editTrackerCategoryCD(for: oldCategory, with: newTitle)
     }
 }
 
