@@ -57,11 +57,9 @@ final class TrackerCategoryStore: NSObject {
 private extension TrackerCategoryStore {
 
     func fetchTrackerCategories() throws -> [TrackerCategory] {
-        guard let objects = fetchedResultsController.fetchedObjects else {
-            throw StoreError.fetchError
-        }
-        let categories = try objects.map { try getTrackerCategory(from: $0) }
-        return categories
+        request.predicate = NSPredicate(format: "title != nil")
+        let categories = try context.fetch(request)
+        return try categories.map { try getTrackerCategory(from: $0) }
     }
 
     func fetchTrackerCategoryCoreData(for category: TrackerCategory) throws -> TrackerCategoryCD {
@@ -113,7 +111,7 @@ private extension TrackerCategoryStore {
     }
 
     func editTrackerCategoryCD(for oldCategory: TrackerCategory, with newTitle: String) throws {
-        request.predicate = NSPredicate(format: "title == %@", oldCategory.title)
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCD.title), oldCategory.title)
         guard let categoryCD = try context.fetch(request).first else {
             throw StoreError.fetchError
         }
@@ -153,7 +151,6 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.didUpdate(TrackerCategoryStoreUpdate(insertedIndexPaths: insertedIndexPaths))
-        insertedIndexPaths.removeAll()
     }
 
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,

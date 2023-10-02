@@ -65,7 +65,6 @@ final class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.categoriesDidChange = { [weak self] _ in
-          //  print("Categories did change. New data: \(self?.viewModel.categoriesList ?? [])")
             self?.checkPlaceholder()
             self?.tableView.reloadData()
         }
