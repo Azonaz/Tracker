@@ -55,10 +55,11 @@ let addCategoryButtonText = NSLocalizedString("addCategory", comment: "")
 let editText = NSLocalizedString("editCategory", comment: "")
 let deleteText = NSLocalizedString("deleteCategory", comment: "")
 let categoryDeleteAlertText = NSLocalizedString("categoryDeleteAlert", comment: "")
+let editCategoryTitle = NSLocalizedString("editingCategory", comment: "")
 
 // NewCategoryViewController
 let newCategoryTextBarPlaceholderText = NSLocalizedString("newCategoryTextPlaceholder", comment: "")
-let newCategoryText = NSLocalizedString("newCategory", comment: "")
+let newCategoryTitle = NSLocalizedString("newCategory", comment: "")
 let readyButtonText = NSLocalizedString("readyButton", comment: "")
 
 // StatisticViewController

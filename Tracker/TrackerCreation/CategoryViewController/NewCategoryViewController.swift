@@ -66,7 +66,8 @@ final class NewCategoryViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = newCategoryText
+        let isEdit = categoryToEdit != nil
+        navigationItem.title = isEdit ? editCategoryTitle : newCategoryTitle
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true

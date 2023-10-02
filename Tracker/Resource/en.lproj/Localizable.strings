@@ -43,6 +43,7 @@
 "editCategory" = "Edit";
 "deleteCategory" = "Delete";
 "categoryDeleteAlert" = "Are you sure this category is not needed?";
+"editingCategory" = "Editing category";
 
 // NewCategoryViewController
 "newCategoryTextPlaceholder" = "Enter category name";

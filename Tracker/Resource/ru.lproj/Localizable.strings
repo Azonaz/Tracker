@@ -43,6 +43,7 @@
 "editCategory" = "Редактировать";
 "deleteCategory" = "Удалить";
 "categoryDeleteAlert" = "Эта категория точно не нужна?";
+"editingCategory" = "Редактирование категории";
 
 // NewCategoryViewController
 "newCategoryTextPlaceholder" = "Введите название категории";
