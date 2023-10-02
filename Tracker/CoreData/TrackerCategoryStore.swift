@@ -111,7 +111,7 @@ private extension TrackerCategoryStore {
     }
 
     func editTrackerCategoryCD(for oldCategory: TrackerCategory, with newTitle: String) throws {
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCD.title), oldCategory.title)
+        request.predicate = NSPredicate(format: "title == %@", oldCategory.title)
         guard let categoryCD = try context.fetch(request).first else {
             throw StoreError.fetchError
         }
