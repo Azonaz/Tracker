@@ -1,12 +1,8 @@
 import Foundation
 import CoreData
 
-struct TrackerCategoryStoreUpdate {
-    let insertedIndexPaths: [IndexPath]
-}
-
 protocol TrackerCategoryStoreDelegate: AnyObject {
-    func didUpdate(_ update: TrackerCategoryStoreUpdate)
+    func didUpdateCategoriesList()
 }
 
 protocol TrackerCategoryStoreDataProviderProtocol {
@@ -25,7 +21,6 @@ final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
     private let request = TrackerCategoryCD.fetchRequest()
     private let uiColorMarshalling = UIColorMarshalling()
-    private var insertedIndexPaths: [IndexPath] = []
 
     private lazy var trackerStore: TrackerStore = {
         TrackerStore(context: context)
@@ -145,23 +140,7 @@ extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, Tracke
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
 
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedIndexPaths.removeAll()
-    }
-
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.didUpdate(TrackerCategoryStoreUpdate(insertedIndexPaths: insertedIndexPaths))
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,
-                    at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let indexPath = newIndexPath {
-                insertedIndexPaths.append(indexPath)
-            }
-        default:
-            break
-        }
+        delegate?.didUpdateCategoriesList()
     }
 }

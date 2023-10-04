@@ -24,6 +24,9 @@ let trackersPlaceholderText = NSLocalizedString("trackersPlaceholderText", comme
 let notFoundedTrackersPlaceholderText = NSLocalizedString("notFoundedTrackersPlaceholderText", comment: "")
 let searchBarPlaceholderText = NSLocalizedString("searchBarPlaceholder", comment: "")
 let filtersText = NSLocalizedString("filters", comment: "")
+let pinAction = NSLocalizedString("pin", comment: "")
+let unpinAction = NSLocalizedString("unpin", comment: "")
+let trackerDeleteAlertText = NSLocalizedString("trackerDeleteAlert", comment: "")
 
 // FiltersViewController
 let allTrackerFilter = NSLocalizedString("allTrackers", comment: "")

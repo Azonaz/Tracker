@@ -42,13 +42,15 @@ class CategoryViewModel {
         return categoriesList[indexPath.row]
     }
 
-    func didUpdateCategories(_ update: TrackerCategoryStoreUpdate) {
-        categoriesDidChange?(categoriesList)
-    }
-
     func deleteCategory(at indexPath: IndexPath) {
         let category = categoriesList[indexPath.row]
         trackerCategoryStore.deleteTrackerCategory(category)
+        getCategoriesList()
+    }
+}
+
+extension CategoryViewModel: TrackerCategoryStoreDelegate {
+    func didUpdateCategoriesList() {
         getCategoriesList()
     }
 }

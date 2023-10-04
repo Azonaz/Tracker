@@ -13,6 +13,7 @@ protocol TrackerStoreDelegate: AnyObject {
 protocol TrackerStoreProtocol {
     func getTracker(_ trackerCD: TrackerCD) throws -> Tracker
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws
+    func deleteTracker(_ tracker: Tracker) throws
 }
 
 final class TrackerStore: NSObject {
@@ -91,6 +92,22 @@ private extension TrackerStore {
         trackerCD.category = trackerCategoryCD
         try context.save()
     }
+
+    func deleteSelectTracker(_ tracker: Tracker) throws {
+        let recordsRequest = NSFetchRequest<TrackerRecordCD>(entityName: "TrackerRecordCD")
+        recordsRequest.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        let deletedTracker = try context.fetch(recordsRequest)
+        deletedTracker.forEach { context.delete($0) }
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let deletesTrackers = try context.fetch(request)
+            deletesTrackers.forEach { context.delete($0) }
+            try context.save()
+        } catch {
+            throw StoreError.deleteError
+        }
+    }
 }
 
 extension TrackerStore: TrackerStoreProtocol {
@@ -101,6 +118,10 @@ extension TrackerStore: TrackerStoreProtocol {
 
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
         try addNewTrackerCoreData(tracker, in: category)
+    }
+
+    func deleteTracker(_ tracker: Tracker) throws {
+        try deleteSelectTracker(tracker)
     }
 }
 

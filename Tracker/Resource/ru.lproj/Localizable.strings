@@ -12,6 +12,9 @@
 "notFoundedTrackersPlaceholderText" = "Ничего не найдено";
 "searchBarPlaceholder" = "Поиск";
 "filters" = "Фильтры";
+"pin" = "Закрепить";
+"unpin" = "Открепить";
+"trackerDeleteAlert" = "Уверены, что хотите удалить трекер?";
 
 // FiltersViewController
 "allTrackers" = "Все трекеры";

@@ -12,6 +12,9 @@
 "notFoundedTrackersPlaceholderText" = "Nothing found";
 "searchBarPlaceholder" = "Search";
 "filters" = "Filters";
+"pin" = "Pin";
+"unpin" = "Unpin";
+"trackerDeleteAlert" = "Are you sure you want to delete the tracker?";
 
 // FiltersViewController
 "allTrackers" = "All trackers";

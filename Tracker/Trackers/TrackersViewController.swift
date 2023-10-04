@@ -9,6 +9,7 @@ class TrackersViewController: UIViewController {
     private var visibleCategories: [TrackerCategory] = []
     private var currentDate: Date?
     private var dataSourсe: TrackerCollectionViewDataSourse?
+    private var selectedIndexPath: IndexPath?
 
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
@@ -224,6 +225,31 @@ class TrackersViewController: UIViewController {
         collectionView.reloadData()
     }
 
+    private func alertForDeletingTracker(at indexPath: IndexPath) {
+        let alert = UIAlertController(title: trackerDeleteAlertText, message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: deleteText, style: .destructive) { _ in
+            self.deleteTracker(at: indexPath)
+        }
+        let cancelAction = UIAlertAction(title: cancelButtonText, style: .cancel)
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true)
+    }
+
+    private func deleteTracker(at indexPath: IndexPath) {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
+        do {
+            try trackerStore.deleteTracker(tracker)
+        } catch {
+            assertionFailure("Unable to delete tracker")
+        }
+        reloadVisibleCategories()
+        updatePlaceholder()
+    }
+
+    private func openEditTracker() {
+    }
+
     @objc
     private func tapAddTrackerButton() {
         let createTrackerViewController = TrackerTypeViewController()
@@ -335,6 +361,25 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 24)
+    }
+}
+
+extension TrackersViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath,
+                        point: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let deleteAction = UIAction(title: deleteText, image: nil) { _ in
+                self.alertForDeletingTracker(at: indexPath)
+            }
+            deleteAction.attributes = [.destructive]
+            let editAction = UIAction(title: editText, image: nil) { _ in
+                self.openEditTracker()
+            }
+            let pinAction = UIAction(title: pinAction, image: nil) { _ in
+                self.openEditTracker()
+            }
+            return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+        }
     }
 }
 
