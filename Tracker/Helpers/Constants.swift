@@ -51,6 +51,7 @@ let createButtonText = NSLocalizedString("createButton", comment: "")
 let everyDayText = NSLocalizedString("everyDay", comment: "")
 let newHabbitText = NSLocalizedString("newHabbit", comment: "")
 let newEventText = NSLocalizedString("newEvent", comment: "")
+let editHabbitText = NSLocalizedString("editHabbit", comment: "")
 
 // CategoryViewController
 let categoryPlaceholderText = NSLocalizedString("categoryPlaceholder", comment: "")

@@ -9,6 +9,8 @@ final class CreateNewTrackerViewController: UIViewController {
 
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
+    var trackerToEdit: Tracker?
+    var recordsLabel: String?
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
     let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let collectionViewHeaders = [headerCollectionViewEmodji, headerCollectionViewColor]
@@ -42,6 +44,16 @@ final class CreateNewTrackerViewController: UIViewController {
        let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
+    }()
+
+    private lazy var recordsQuantity: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textColor = .ypBlack
+        label.textAlignment = .center
+        label.text = "0"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
 
     private lazy var nameTextField: UITextField = {
@@ -178,6 +190,35 @@ final class CreateNewTrackerViewController: UIViewController {
         tapGesture.cancelsTouchesInView = false
         scrollView.addGestureRecognizer(tapGesture)
         createView()
+        editTracker()
+    }
+
+    private func editTracker() {
+        if let tracker = trackerToEdit {
+            nameTextField.text = tracker.title
+            recordsQuantity.text = recordsLabel
+            //            categorySubtitle =
+            //            scheduleSubtitle = tracker.schedule
+            //            emodji = tracker.emodji
+            //                    color = tracker.color
+            if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
+                let emodjiIndexPath = IndexPath(row: emodjiIndex, section: 0)
+                selectedIndexEmodjy = emodjiIndexPath
+                DispatchQueue.main.async {
+                    self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
+                    self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
+                }
+            }
+            if let colorIndex = colorSelection.firstIndex(where: { $0.hexString() == tracker.color.hexString()}) {
+                let colorIndexPath = IndexPath(row: colorIndex, section: 0)
+                selectedIndexColor = colorIndexPath
+                DispatchQueue.main.async {
+                    self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
+                    self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
+                }
+            }
+        }
+        checkCreateButton()
     }
 
     func getCellTitles() -> [String] {
@@ -215,7 +256,8 @@ final class CreateNewTrackerViewController: UIViewController {
             containView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             containView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            textFieldStackView.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
+            textFieldStackView.topAnchor.constraint(equalTo: trackerToEdit != nil ? recordsQuantity.bottomAnchor
+                                                    : containView.topAnchor, constant: 24),
             textFieldStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
             textFieldStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -244,12 +286,26 @@ final class CreateNewTrackerViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = isHabit ? newHabbitText : newEventText
+        let navigationTitle: String
+        if trackerToEdit != nil {
+            navigationTitle = editHabbitText
+        } else {
+            navigationTitle = isHabit ? newHabbitText : newEventText
+        }
+        navigationItem.title = navigationTitle
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
         view.addSubview(scrollView)
         scrollView.addSubview(containView)
+        if trackerToEdit != nil {
+            containView.addSubview(recordsQuantity)
+            NSLayoutConstraint.activate([
+                recordsQuantity.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
+                recordsQuantity.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
+                recordsQuantity.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
+                recordsQuantity.heightAnchor.constraint(equalToConstant: 38)
+            ])}
         containView.addSubview(textFieldStackView)
         containView.addSubview(habitTableView)
         containView.addSubview(buttonStackView)

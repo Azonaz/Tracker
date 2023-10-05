@@ -24,7 +24,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .ypWhite
+        label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -155,7 +155,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    private func getDaysText(_ doneDays: Int) -> String {
+    func getDaysText(_ doneDays: Int) -> String {
         let formatDaysString: String = NSLocalizedString("daysAmount", comment: "")
         let resultDaysString: String = String.localizedStringWithFormat(formatDaysString, doneDays)
         return resultDaysString

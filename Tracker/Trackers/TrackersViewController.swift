@@ -243,11 +243,20 @@ class TrackersViewController: UIViewController {
         } catch {
             assertionFailure("Unable to delete tracker")
         }
-        reloadVisibleCategories()
+        reloadData()
         updatePlaceholder()
     }
 
-    private func openEditTracker() {
+    private func openEditTracker(tracker: Tracker) {
+        let editTrackerViewController = CreateNewTrackerViewController(isHabit: true)
+        editTrackerViewController.delegate = self
+        editTrackerViewController.trackerToEdit = tracker
+        let selectTrackerRecords = getTrackersRecords(for: tracker).filter({ $0.id == tracker.id }).count
+        let selectTrackerRecordsText = String.localizedStringWithFormat(NSLocalizedString("daysAmount", comment: ""),
+                                                                        selectTrackerRecords)
+        editTrackerViewController.recordsLabel = selectTrackerRecordsText
+        let navigationController = UINavigationController(rootViewController: editTrackerViewController)
+        present(navigationController, animated: true)
     }
 
     @objc
@@ -373,10 +382,10 @@ extension TrackersViewController: UICollectionViewDelegate {
             }
             deleteAction.attributes = [.destructive]
             let editAction = UIAction(title: editText, image: nil) { _ in
-                self.openEditTracker()
+                self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row])
             }
             let pinAction = UIAction(title: pinAction, image: nil) { _ in
-                self.openEditTracker()
+                    //  self.openEditTracker()
             }
             return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
         }

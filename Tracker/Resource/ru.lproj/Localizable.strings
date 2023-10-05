@@ -39,6 +39,7 @@
 "everyDay" = "Каждый день";
 "newHabbit" = "Новая привычка";
 "newEvent" = "Новое нерегулярное событие";
+"editHabbit" = "Редактирование привычки";
 
 // CategoryViewController
 "categoryPlaceholder" = "Привычки и события можно объединить по смыслу";
