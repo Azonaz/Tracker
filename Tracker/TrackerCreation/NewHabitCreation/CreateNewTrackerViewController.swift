@@ -6,11 +6,12 @@ protocol UpdateCellSubtitleDelegate: AnyObject {
 }
 
 final class CreateNewTrackerViewController: UIViewController {
-
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
     var trackerToEdit: Tracker?
+    var categoryEditTracker: String?
     var recordsLabel: String?
+    private let colorMarshalling = UIColorMarshalling()
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
     let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
     private let collectionViewHeaders = [headerCollectionViewEmodji, headerCollectionViewColor]
@@ -31,6 +32,8 @@ final class CreateNewTrackerViewController: UIViewController {
     private var color: UIColor?
     private var selectedIndexEmodjy: IndexPath?
     private var selectedIndexColor: IndexPath?
+    private var checkButtonText: String = ""
+    private var trackerToEditID = UUID()
 
     private lazy var scrollView: UIScrollView = {
        let scrollView = UIScrollView()
@@ -51,7 +54,6 @@ final class CreateNewTrackerViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         label.textColor = .ypBlack
         label.textAlignment = .center
-        label.text = "0"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -155,7 +157,7 @@ final class CreateNewTrackerViewController: UIViewController {
         button.backgroundColor = .ypGray
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.ypWhite, for: .normal)
-        button.setTitle(createButtonText, for: .normal)
+        button.setTitle(checkButtonText, for: .normal)
         button.isEnabled = false
         button.addTarget(self, action: #selector(tapCreateButton), for: .touchUpInside)
         return button
@@ -189,36 +191,13 @@ final class CreateNewTrackerViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         scrollView.addGestureRecognizer(tapGesture)
-        createView()
-        editTracker()
-    }
-
-    private func editTracker() {
-        if let tracker = trackerToEdit {
-            nameTextField.text = tracker.title
-            recordsQuantity.text = recordsLabel
-            //            categorySubtitle =
-            //            scheduleSubtitle = tracker.schedule
-            //            emodji = tracker.emodji
-            //                    color = tracker.color
-            if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
-                let emodjiIndexPath = IndexPath(row: emodjiIndex, section: 0)
-                selectedIndexEmodjy = emodjiIndexPath
-                DispatchQueue.main.async {
-                    self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
-                    self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
-                }
-            }
-            if let colorIndex = colorSelection.firstIndex(where: { $0.hexString() == tracker.color.hexString()}) {
-                let colorIndexPath = IndexPath(row: colorIndex, section: 0)
-                selectedIndexColor = colorIndexPath
-                DispatchQueue.main.async {
-                    self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
-                    self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
-                }
-            }
+        if trackerToEdit != nil {
+            checkButtonText = saveButtonText
+        } else {
+            checkButtonText = createButtonText
         }
-        checkCreateButton()
+        createView()
+        createEditTrackerView()
     }
 
     func getCellTitles() -> [String] {
@@ -314,6 +293,75 @@ final class CreateNewTrackerViewController: UIViewController {
         activateConstraints()
     }
 
+    private func createEditTrackerView() {
+        if let tracker = trackerToEdit {
+            trackerToEditID = tracker.id
+            nameTextField.text = tracker.title
+            recordsQuantity.text = recordsLabel
+            categorySubtitle = categoryEditTracker ?? ""
+            scheduleSubtitle = tracker.schedule
+            for (index, day) in Weekday.allCases.enumerated() where scheduleSubtitle.contains(day) {
+                scheduleSelectedDays[index] = true
+            }
+            if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
+                let emodjiIndexPath = IndexPath(row: emodjiIndex, section: 0)
+                selectedIndexEmodjy = emodjiIndexPath
+                DispatchQueue.main.async {
+                    self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
+                    self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
+                }
+            }
+            if let colorIndex = colorSelection.firstIndex(where: {
+                colorMarshalling.getHexString(from: $0) == colorMarshalling.getHexString(from: tracker.color)
+            }) {
+                let colorIndexPath = IndexPath(row: colorIndex, section: 0)
+                selectedIndexColor = colorIndexPath
+                DispatchQueue.main.async {
+                    self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
+                    self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
+                }
+            }
+        }
+        checkCreateButton()
+    }
+
+    private func checkCreateButton() {
+        let isEmodjiSelected = emodji != nil
+        let isColorSelected = color != nil
+        let isCategorySubtitleFilled = !categorySubtitle.isEmpty
+        let isScheduleSubtitleFilled = !scheduleSubtitle.isEmpty || !scheduleSelectedDays.isEmpty
+        let isNameFilled = !(nameTextField.text?.isEmpty ?? true)
+        createButton.isEnabled = isEmodjiSelected && isColorSelected && isCategorySubtitleFilled &&
+        isScheduleSubtitleFilled && isNameFilled
+        createButton.backgroundColor = createButton.isEnabled ? UIColor.ypBlack : UIColor.gray
+    }
+
+    @objc
+    private func tapCancelButton() {
+        dismiss(animated: true)
+    }
+
+    @objc
+    private func tapCreateButton() {
+        if trackerToEdit != nil {
+            editTracker(id: trackerToEditID)
+        } else {
+            createTracker()
+        }
+        delegate?.updateTrackers()
+        var currentViewController = self.presentingViewController
+        while currentViewController is UINavigationController {
+            currentViewController = currentViewController?.presentingViewController
+        }
+        currentViewController?.dismiss(animated: true)
+    }
+
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        view.endEditing(true)
+    }
+}
+
+extension CreateNewTrackerViewController {
     private func createTracker() {
         let categoryTitle = categorySubtitle
         let newTracker = Tracker(id: UUID(),
@@ -336,40 +384,31 @@ final class CreateNewTrackerViewController: UIViewController {
         }
     }
 
-    private func checkCreateButton() {
-        let isEmodjiSelected = emodji != nil
-        let isColorSelected = color != nil
-        let isCategorySubtitleFilled = !categorySubtitle.isEmpty
-        let isScheduleSubtitleFilled = !scheduleSubtitle.isEmpty || !scheduleSelectedDays.isEmpty
-        let isNameFilled = !(nameTextField.text?.isEmpty ?? true)
-        createButton.isEnabled = isEmodjiSelected && isColorSelected && isCategorySubtitleFilled &&
-        isScheduleSubtitleFilled && isNameFilled
-        createButton.backgroundColor = createButton.isEnabled ? UIColor.ypBlack : UIColor.gray
-    }
-
-    @objc
-    private func tapCancelButton() {
-        dismiss(animated: true)
-    }
-
-    @objc
-    private func tapCreateButton() {
-        createTracker()
-        delegate?.updateTrackers()
-        var currentViewController = self.presentingViewController
-        while currentViewController is UINavigationController {
-            currentViewController = currentViewController?.presentingViewController
+    private func editTracker(id: UUID) {
+        let categoryTitle = categorySubtitle
+        let trackerToEdit = Tracker(id: id,
+                                    title: nameTextField.text ?? "",
+                                    color: color ?? UIColor(),
+                                    emodji: emodji ?? String(),
+                                    schedule: scheduleSubtitle)
+        do {
+            let categories = try trackerCategoryStore.getTrackerCategories()
+            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
+                let updatedCategoryTrackers = foundCategory.trackers + [trackerToEdit]
+                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
+                try trackerStore.editTracker(trackerToEdit, in: updatedCategory)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [trackerToEdit])
+                try trackerStore.editTracker(trackerToEdit, in: newCategory)
+            }
+        } catch {
+            assertionFailure("Unable to edit tracker")
         }
-        currentViewController?.dismiss(animated: true)
     }
 
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        view.endEditing(true)
-    }
 }
 
 extension CreateNewTrackerViewController: UITextFieldDelegate {
-
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         view.endEditing(true)

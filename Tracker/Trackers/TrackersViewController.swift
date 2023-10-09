@@ -247,10 +247,11 @@ class TrackersViewController: UIViewController {
         updatePlaceholder()
     }
 
-    private func openEditTracker(tracker: Tracker) {
+    private func openEditTracker(tracker: Tracker, category: String) {
         let editTrackerViewController = CreateNewTrackerViewController(isHabit: true)
         editTrackerViewController.delegate = self
         editTrackerViewController.trackerToEdit = tracker
+        editTrackerViewController.categoryEditTracker = category
         let selectTrackerRecords = getTrackersRecords(for: tracker).filter({ $0.id == tracker.id }).count
         let selectTrackerRecordsText = String.localizedStringWithFormat(NSLocalizedString("daysAmount", comment: ""),
                                                                         selectTrackerRecords)
@@ -382,10 +383,11 @@ extension TrackersViewController: UICollectionViewDelegate {
             }
             deleteAction.attributes = [.destructive]
             let editAction = UIAction(title: editText, image: nil) { _ in
-                self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row])
+                self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row],
+                                     category: self.visibleCategories[indexPath.section].title)
             }
             let pinAction = UIAction(title: pinAction, image: nil) { _ in
-                    //  self.openEditTracker()
+                //  self.openEditTracker()
             }
             return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
         }

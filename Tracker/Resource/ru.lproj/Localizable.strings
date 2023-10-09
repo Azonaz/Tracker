@@ -40,6 +40,7 @@
 "newHabbit" = "Новая привычка";
 "newEvent" = "Новое нерегулярное событие";
 "editHabbit" = "Редактирование привычки";
+"saveButton" = "Сохранить";
 
 // CategoryViewController
 "categoryPlaceholder" = "Привычки и события можно объединить по смыслу";

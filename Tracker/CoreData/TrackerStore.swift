@@ -14,6 +14,7 @@ protocol TrackerStoreProtocol {
     func getTracker(_ trackerCD: TrackerCD) throws -> Tracker
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws
     func deleteTracker(_ tracker: Tracker) throws
+    func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws
 }
 
 final class TrackerStore: NSObject {
@@ -108,6 +109,25 @@ private extension TrackerStore {
             throw StoreError.deleteError
         }
     }
+
+    func editTrackerCoreData(_ tracker: Tracker, in category: TrackerCategory) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToEdit = trackers.first {
+                trackerToEdit.title = tracker.title
+                trackerToEdit.color = uiColorMarshalling.getHexString(from: tracker.color)
+                trackerToEdit.emodji = tracker.emodji
+                trackerToEdit.schedule = tracker.schedule.compactMap { $0.rawValue }.joined(separator: ", ")
+                let categoryCD = try trackerCategoryStore.fetchTrackerCategory(for: category)
+                trackerToEdit.category = categoryCD
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
 }
 
 extension TrackerStore: TrackerStoreProtocol {
@@ -122,6 +142,10 @@ extension TrackerStore: TrackerStoreProtocol {
 
     func deleteTracker(_ tracker: Tracker) throws {
         try deleteSelectTracker(tracker)
+    }
+
+    func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
+        try editTrackerCoreData(tracker, in: category)
     }
 }
 

@@ -40,6 +40,7 @@
 "newHabbit" = "New habit";
 "newEvent" = "New irregular event";
 "editHabbit" = "Habit editing";
+"saveButton" = "Save";
 
 // CategoryViewController
 "categoryPlaceholder" = "Habits and events can be combined by meaning";
