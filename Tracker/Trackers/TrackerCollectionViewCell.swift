@@ -12,6 +12,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCollectionViewCellDelegate?
     private let currentDate: Date? = nil
     private var isDoneToday: Bool = false
+    private var isPinned: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
 
@@ -79,8 +80,19 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
 
-    func configure(with tracker: Tracker, isDoneToday: Bool, doneDays: Int, at indexPath: IndexPath) {
+    private lazy var pinImage: UIImageView = {
+        let view = UIImageView()
+        view.image = .pinImage
+        view.contentMode = .center
+        view.tintColor = .white
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    func configure(with tracker: Tracker, isDoneToday: Bool, isPinned: Bool, doneDays: Int, at indexPath: IndexPath) {
         self.isDoneToday = isDoneToday
+        self.isPinned = isPinned
         self.trackerId = tracker.id
         self.indexPath = indexPath
         let color = tracker.color
@@ -92,6 +104,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let daysText = getDaysText(doneDays)
         countDayLabel.text = daysText
         checkDoneToday()
+        checkPinned()
         checkDate()
     }
 
@@ -99,6 +112,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         addTrackerView()
         addStackView()
         addEmojiLabel()
+        addPinImage()
         addTrackerTitleLabel()
         addCounterDayLabel()
         addCountDayButton()
@@ -130,6 +144,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             emodjiLabel.heightAnchor.constraint(equalToConstant: 24),
             emodjiLabel.topAnchor.constraint(equalTo: trackerView.topAnchor, constant: 12),
             emodjiLabel.leadingAnchor.constraint(equalTo: trackerView.leadingAnchor, constant: 12)
+        ])
+    }
+
+    private func addPinImage() {
+        trackerView.addSubview(pinImage)
+        NSLayoutConstraint.activate([
+            pinImage.widthAnchor.constraint(equalToConstant: 24),
+            pinImage.heightAnchor.constraint(equalToConstant: 24),
+            pinImage.topAnchor.constraint(equalTo: trackerView.topAnchor, constant: 12),
+            pinImage.trailingAnchor.constraint(equalTo: trackerView.trailingAnchor, constant: -12)
         ])
     }
 
@@ -166,6 +190,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let image = isDoneToday ? doneImage : plusImage
         countDayButton.setImage(image, for: .normal)
         countDayButton.layer.opacity = opacity
+    }
+
+    private func checkPinned() {
+        if isPinned {
+            pinImage.isHidden = false
+        } else {
+            pinImage.isHidden = true
+        }
     }
 
     private func checkDate() {

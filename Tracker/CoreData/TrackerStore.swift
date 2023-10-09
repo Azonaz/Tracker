@@ -15,6 +15,8 @@ protocol TrackerStoreProtocol {
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws
     func deleteTracker(_ tracker: Tracker) throws
     func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws
+    func pinTracker(_ tracker: Tracker) throws
+    func unpinTracker(_ tracker: Tracker) throws
 }
 
 final class TrackerStore: NSObject {
@@ -79,7 +81,8 @@ private extension TrackerStore {
                        title: title,
                        color: uiColorMarshalling.getColor(from: colorString),
                        emodji: emodji,
-                       schedule: scheduleString.components(separatedBy: ", ").compactMap { Weekday(rawValue: $0) })
+                       schedule: scheduleString.components(separatedBy: ", ").compactMap { Weekday(rawValue: $0) },
+                       isPinned: trackerCD.isPinned)
     }
 
     func addNewTrackerCoreData(_ tracker: Tracker, in category: TrackerCategory) throws {
@@ -128,6 +131,34 @@ private extension TrackerStore {
             throw StoreError.decodingError
         }
     }
+
+    func pinTrackerCoreData(_ tracker: Tracker) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToPin = trackers.first {
+                trackerToPin.isPinned = true
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
+
+    func unpinTrackerCoreData(_ tracker: Tracker) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToUnpin = trackers.first {
+                trackerToUnpin.isPinned = false
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
 }
 
 extension TrackerStore: TrackerStoreProtocol {
@@ -146,6 +177,14 @@ extension TrackerStore: TrackerStoreProtocol {
 
     func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
         try editTrackerCoreData(tracker, in: category)
+    }
+
+    func pinTracker(_ tracker: Tracker) throws {
+        try pinTrackerCoreData(tracker)
+    }
+
+    func unpinTracker(_ tracker: Tracker) throws {
+        try unpinTrackerCoreData(tracker)
     }
 }
 

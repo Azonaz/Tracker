@@ -28,8 +28,10 @@ final class TrackerCollectionViewDataSourse: NSObject, UICollectionViewDataSourc
             return UICollectionViewCell()
         }
         trackerCell.delegate = viewController
+        let isPinned = tracker.isPinned
         trackerCell.configure(with: tracker,
                               isDoneToday: isDoneToday,
+                              isPinned: isPinned,
                               doneDays: doneDays,
                               at: indexPath)
         return trackerCell

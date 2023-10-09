@@ -347,6 +347,28 @@ extension TrackersViewController: TrackerCollectionViewCellDelegate {
             return false
         }
     }
+
+    func pinTracker(id: UUID) {
+        if let trackerToPin = categories.flatMap({ $0.trackers }).first(where: { $0.id == id }) {
+            do {
+                try trackerStore.pinTracker(trackerToPin)
+            } catch {
+                assertionFailure("Unable to pin tracker")
+            }
+            reloadData()
+        }
+    }
+
+    func unpinTracker(id: UUID) {
+        if let trackerToUnpin = categories.flatMap({ $0.trackers }).first(where: { $0.id == id }) {
+            do {
+                try trackerStore.unpinTracker(trackerToUnpin)
+            } catch {
+                assertionFailure("Unable to unpin tracker")
+            }
+            reloadData()
+        }
+    }
 }
 
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
@@ -386,8 +408,14 @@ extension TrackersViewController: UICollectionViewDelegate {
                 self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row],
                                      category: self.visibleCategories[indexPath.section].title)
             }
-            let pinAction = UIAction(title: pinAction, image: nil) { _ in
-                //  self.openEditTracker()
+            let pinActionTitle = self.visibleCategories[indexPath.section].trackers[indexPath.row].isPinned
+            ? unpinAction : pinAction
+            let pinAction = UIAction(title: pinActionTitle, image: nil) { _ in
+                if self.visibleCategories[indexPath.section].trackers[indexPath.row].isPinned {
+                    self.unpinTracker(id: self.visibleCategories[indexPath.section].trackers[indexPath.row].id)
+                } else {
+                    self.pinTracker(id: self.visibleCategories[indexPath.section].trackers[indexPath.row].id)
+                }
             }
             return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
         }

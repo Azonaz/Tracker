@@ -15,6 +15,7 @@
 "pin" = "Pin";
 "unpin" = "Unpin";
 "trackerDeleteAlert" = "Are you sure you want to delete the tracker?";
+"pinnedTrackers" = "Pinned";
 
 // FiltersViewController
 "allTrackers" = "All trackers";

@@ -15,6 +15,7 @@
 "pin" = "Закрепить";
 "unpin" = "Открепить";
 "trackerDeleteAlert" = "Уверены, что хотите удалить трекер?";
+"pinnedTrackers" = "Закрепленные";
 
 // FiltersViewController
 "allTrackers" = "Все трекеры";

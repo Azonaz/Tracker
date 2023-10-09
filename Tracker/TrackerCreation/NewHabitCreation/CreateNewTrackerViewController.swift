@@ -17,14 +17,10 @@ final class CreateNewTrackerViewController: UIViewController {
     private let collectionViewHeaders = [headerCollectionViewEmodji, headerCollectionViewColor]
     private var tableTitles: [String] = []
     private var isHabit: Bool
-    private lazy var titleCells: [String] = {
-        isHabit ? [headerCategory, headerSchedule] : [headerCategory]
-    }()
+    private lazy var titleCells: [String] = { isHabit ? [headerCategory, headerSchedule] : [headerCategory] }()
     private var trackerTitle: String = ""
     private var categorySubtitle: String = ""
-    private lazy var scheduleSubtitle: [Weekday] = {
-        isHabit ? [] : Weekday.allCases
-    }()
+    private lazy var scheduleSubtitle: [Weekday] = { isHabit ? [] : Weekday.allCases }()
     private var scheduleSelectedDays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
@@ -200,30 +196,6 @@ final class CreateNewTrackerViewController: UIViewController {
         createEditTrackerView()
     }
 
-    func getCellTitles() -> [String] {
-        titleCells
-    }
-
-    func getCategorySubtitle() -> String {
-        categorySubtitle
-    }
-
-    func getSchedule() -> [Weekday] {
-        scheduleSubtitle
-    }
-
-    func getScheduleSelectedDays() -> [Int: Bool] {
-        scheduleSelectedDays
-    }
-
-    func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
-        if scheduleSelectedDays == Weekday.allCases {
-            return everyDayText
-        } else {
-            return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
-        }
-    }
-
     private func activateConstraints() {
         NSLayoutConstraint.activate([
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -294,35 +266,106 @@ final class CreateNewTrackerViewController: UIViewController {
     }
 
     private func createEditTrackerView() {
-        if let tracker = trackerToEdit {
-            trackerToEditID = tracker.id
-            nameTextField.text = tracker.title
-            recordsQuantity.text = recordsLabel
-            categorySubtitle = categoryEditTracker ?? ""
-            scheduleSubtitle = tracker.schedule
-            for (index, day) in Weekday.allCases.enumerated() where scheduleSubtitle.contains(day) {
-                scheduleSelectedDays[index] = true
+        guard let tracker = trackerToEdit else { return }
+        trackerToEditID = tracker.id
+        nameTextField.text = tracker.title
+        recordsQuantity.text = recordsLabel
+        categorySubtitle = categoryEditTracker ?? ""
+        scheduleSubtitle = tracker.schedule
+        if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
+            selectedIndexEmodjy = IndexPath(row: emodjiIndex, section: 0)
+        }
+        if let colorIndex = colorSelection.firstIndex(where: {
+            colorMarshalling.getHexString(from: $0) == colorMarshalling.getHexString(from: tracker.color)
+        }) {
+            selectedIndexColor = IndexPath(row: colorIndex, section: 0)
+        }
+        for (index, day) in Weekday.allCases.enumerated() where scheduleSubtitle.contains(day) {
+            scheduleSelectedDays[index] = true
+        }
+        DispatchQueue.main.async {
+            if let emodjiIndexPath = self.selectedIndexEmodjy {
+                self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
+                self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
             }
-            if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
-                let emodjiIndexPath = IndexPath(row: emodjiIndex, section: 0)
-                selectedIndexEmodjy = emodjiIndexPath
-                DispatchQueue.main.async {
-                    self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
-                    self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
-                }
-            }
-            if let colorIndex = colorSelection.firstIndex(where: {
-                colorMarshalling.getHexString(from: $0) == colorMarshalling.getHexString(from: tracker.color)
-            }) {
-                let colorIndexPath = IndexPath(row: colorIndex, section: 0)
-                selectedIndexColor = colorIndexPath
-                DispatchQueue.main.async {
-                    self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
-                    self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
-                }
+            if let colorIndexPath = self.selectedIndexColor {
+                self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
+                self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
             }
         }
         checkCreateButton()
+    }
+}
+
+extension CreateNewTrackerViewController {
+    func getCellTitles() -> [String] {
+        titleCells
+    }
+
+    func getCategorySubtitle() -> String {
+        categorySubtitle
+    }
+
+    func getSchedule() -> [Weekday] {
+        scheduleSubtitle
+    }
+
+    func getScheduleSelectedDays() -> [Int: Bool] {
+        scheduleSelectedDays
+    }
+
+    func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
+        if scheduleSelectedDays == Weekday.allCases {
+            return everyDayText
+        } else {
+            return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
+        }
+    }
+
+    private func createTracker() {
+        let categoryTitle = categorySubtitle
+        let newTracker = Tracker(id: UUID(),
+                                 title: nameTextField.text ?? "",
+                                 color: color ?? UIColor(),
+                                 emodji: emodji ?? String(),
+                                 schedule: scheduleSubtitle,
+                                 isPinned: false)
+        do {
+            let categories = try trackerCategoryStore.getTrackerCategories()
+            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
+                let updatedCategoryTrackers = foundCategory.trackers + [newTracker]
+                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
+                try trackerStore.addTracker(newTracker, in: updatedCategory)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [newTracker])
+                try trackerStore.addTracker(newTracker, in: newCategory)
+            }
+        } catch {
+            assertionFailure("Unable to add tracker")
+        }
+    }
+
+    private func editTracker(id: UUID) {
+        let categoryTitle = categorySubtitle
+        let trackerToEdit = Tracker(id: id,
+                                    title: nameTextField.text ?? "",
+                                    color: color ?? UIColor(),
+                                    emodji: emodji ?? String(),
+                                    schedule: scheduleSubtitle,
+                                    isPinned: false)
+        do {
+            let categories = try trackerCategoryStore.getTrackerCategories()
+            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
+                let updatedCategoryTrackers = foundCategory.trackers + [trackerToEdit]
+                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
+                try trackerStore.editTracker(trackerToEdit, in: updatedCategory)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [trackerToEdit])
+                try trackerStore.editTracker(trackerToEdit, in: newCategory)
+            }
+        } catch {
+            assertionFailure("Unable to edit tracker")
+        }
     }
 
     private func checkCreateButton() {
@@ -359,53 +402,6 @@ final class CreateNewTrackerViewController: UIViewController {
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
         view.endEditing(true)
     }
-}
-
-extension CreateNewTrackerViewController {
-    private func createTracker() {
-        let categoryTitle = categorySubtitle
-        let newTracker = Tracker(id: UUID(),
-                                 title: nameTextField.text ?? "",
-                                 color: color ?? UIColor(),
-                                 emodji: emodji ?? String(),
-                                 schedule: scheduleSubtitle)
-        do {
-            let categories = try trackerCategoryStore.getTrackerCategories()
-            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
-                let updatedCategoryTrackers = foundCategory.trackers + [newTracker]
-                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
-                try trackerStore.addTracker(newTracker, in: updatedCategory)
-            } else {
-                let newCategory = TrackerCategory(title: categoryTitle, trackers: [newTracker])
-                try trackerStore.addTracker(newTracker, in: newCategory)
-            }
-        } catch {
-            assertionFailure("Unable to add tracker")
-        }
-    }
-
-    private func editTracker(id: UUID) {
-        let categoryTitle = categorySubtitle
-        let trackerToEdit = Tracker(id: id,
-                                    title: nameTextField.text ?? "",
-                                    color: color ?? UIColor(),
-                                    emodji: emodji ?? String(),
-                                    schedule: scheduleSubtitle)
-        do {
-            let categories = try trackerCategoryStore.getTrackerCategories()
-            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
-                let updatedCategoryTrackers = foundCategory.trackers + [trackerToEdit]
-                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
-                try trackerStore.editTracker(trackerToEdit, in: updatedCategory)
-            } else {
-                let newCategory = TrackerCategory(title: categoryTitle, trackers: [trackerToEdit])
-                try trackerStore.editTracker(trackerToEdit, in: newCategory)
-            }
-        } catch {
-            assertionFailure("Unable to edit tracker")
-        }
-    }
-
 }
 
 extension CreateNewTrackerViewController: UITextFieldDelegate {

@@ -27,6 +27,7 @@ let filtersText = NSLocalizedString("filters", comment: "")
 let pinAction = NSLocalizedString("pin", comment: "")
 let unpinAction = NSLocalizedString("unpin", comment: "")
 let trackerDeleteAlertText = NSLocalizedString("trackerDeleteAlert", comment: "")
+let pinnedCategoryText = NSLocalizedString("pinnedTrackers", comment: "")
 
 // FiltersViewController
 let allTrackerFilter = NSLocalizedString("allTrackers", comment: "")
