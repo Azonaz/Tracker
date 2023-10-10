@@ -201,11 +201,28 @@ class TrackersViewController: UIViewController {
     private func applyFiltersToCategories() -> [TrackerCategory] {
         let selectedWeekday = Calendar.current.component(.weekday, from: datePicker.date)
         let searchText = searchTextBar.searchTextField.text?.lowercased() ?? ""
-        return categories.compactMap { category in
-            let filteredTrackers = filterTrackers(in: category, with: searchText, and: selectedWeekday)
-            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title,
-                                                                    trackers: filteredTrackers)
+        let pinnedTrackers = categories.flatMap { category in
+            filterTrackers(in: category, with: searchText, and: selectedWeekday)
+                .filter { tracker in
+                    return tracker.isPinned
+                }
         }
+        var resultCategories: [TrackerCategory] = []
+        for category in categories {
+            let filteredTrackers = filterTrackers(in: category, with: searchText, and: selectedWeekday)
+                .filter { tracker in
+                    return !tracker.isPinned
+                }
+            if !filteredTrackers.isEmpty {
+                let filteredCategory = TrackerCategory(title: category.title, trackers: filteredTrackers)
+                resultCategories.append(filteredCategory)
+            }
+        }
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(title: pinnedCategoryText, trackers: pinnedTrackers)
+            resultCategories.insert(pinnedCategory, at: 0)
+        }
+        return resultCategories
     }
 
     private func filterTrackers(in category: TrackerCategory, with searchText: String,
@@ -247,11 +264,11 @@ class TrackersViewController: UIViewController {
         updatePlaceholder()
     }
 
-    private func openEditTracker(tracker: Tracker, category: String) {
+    private func openEditTracker(tracker: Tracker) {
         let editTrackerViewController = CreateNewTrackerViewController(isHabit: true)
         editTrackerViewController.delegate = self
         editTrackerViewController.trackerToEdit = tracker
-        editTrackerViewController.categoryEditTracker = category
+        editTrackerViewController.categoryEditTracker = trackerStore.fetchCategoryForTracker(with: tracker.id)
         let selectTrackerRecords = getTrackersRecords(for: tracker).filter({ $0.id == tracker.id }).count
         let selectTrackerRecordsText = String.localizedStringWithFormat(NSLocalizedString("daysAmount", comment: ""),
                                                                         selectTrackerRecords)
@@ -405,8 +422,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             }
             deleteAction.attributes = [.destructive]
             let editAction = UIAction(title: editText, image: nil) { _ in
-                self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row],
-                                     category: self.visibleCategories[indexPath.section].title)
+                self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row])
             }
             let pinActionTitle = self.visibleCategories[indexPath.section].trackers[indexPath.row].isPinned
             ? unpinAction : pinAction

@@ -14,6 +14,7 @@ protocol TrackerStoreProtocol {
     func getTracker(_ trackerCD: TrackerCD) throws -> Tracker
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws
     func deleteTracker(_ tracker: Tracker) throws
+    func fetchCategoryForTracker(with id: UUID) -> String
     func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws
     func pinTracker(_ tracker: Tracker) throws
     func unpinTracker(_ tracker: Tracker) throws
@@ -113,6 +114,15 @@ private extension TrackerStore {
         }
     }
 
+    func fetchCategoryForSelectTracker(with id: UUID) -> String {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+            request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
+            if let trackerCD = try? context.fetch(request).first {
+                return trackerCD.category?.title ?? ""
+            }
+            return ""
+    }
+
     func editTrackerCoreData(_ tracker: Tracker, in category: TrackerCategory) throws {
         let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
         request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
@@ -173,6 +183,10 @@ extension TrackerStore: TrackerStoreProtocol {
 
     func deleteTracker(_ tracker: Tracker) throws {
         try deleteSelectTracker(tracker)
+    }
+
+    func fetchCategoryForTracker(with id: UUID) -> String {
+        fetchCategoryForSelectTracker(with: id)
     }
 
     func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
