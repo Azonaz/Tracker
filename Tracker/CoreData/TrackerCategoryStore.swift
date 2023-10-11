@@ -98,11 +98,33 @@ private extension TrackerCategoryStore {
 
     func deleteSelectedTrackerCategory(_ category: TrackerCategory) throws {
         request.predicate = NSPredicate(format: "title == %@", category.title)
-        guard let categoryCD = try context.fetch(request).first else {
-            throw StoreError.fetchError
+        do {
+            let categoryCD = try context.fetch(request).first
+            guard let categoryToDelete = categoryCD else {
+                throw StoreError.fetchError
+            }
+            if let trackers = categoryToDelete.trackers as? Set<TrackerCD> {
+                for tracker in trackers {
+                    let recordsRequest = NSFetchRequest<TrackerRecordCD>(entityName: "TrackerRecordCD")
+                    recordsRequest.predicate = NSPredicate(format: "id = %@", tracker.id! as any CVarArg)
+                    let deletedTracker = try context.fetch(recordsRequest)
+                    deletedTracker.forEach { context.delete($0) }
+                    let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+                    request.predicate = NSPredicate(format: "id = %@", tracker.id! as any CVarArg)
+                    do {
+                        let deletesTrackers = try context.fetch(request)
+                        deletesTrackers.forEach { context.delete($0) }
+                        try context.save()
+                    } catch {
+                        throw StoreError.deleteError
+                    }
+                }
+            }
+            context.delete(categoryToDelete)
+            try context.save()
+        } catch {
+            throw StoreError.deleteError
         }
-        context.delete(categoryCD)
-        try context.save()
     }
 
     func editTrackerCategoryCD(for oldCategory: TrackerCategory, with newTitle: String) throws {

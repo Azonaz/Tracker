@@ -1,13 +1,8 @@
 import Foundation
 import CoreData
 
-struct TrackerStoreUpdate {
-    let insertedSections: IndexSet
-    let insertedIndexPaths: [IndexPath]
-}
-
 protocol TrackerStoreDelegate: AnyObject {
-    func didUpdate(_ update: TrackerStoreUpdate)
+    func didUpdate()
 }
 
 protocol TrackerStoreProtocol {
@@ -203,39 +198,7 @@ extension TrackerStore: TrackerStoreProtocol {
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
-
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedSections.removeAll()
-        insertedIndexPaths.removeAll()
-    }
-
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.didUpdate(TrackerStoreUpdate(insertedSections: insertedSections,
-                                               insertedIndexPaths: insertedIndexPaths))
-        insertedSections.removeAll()
-        insertedIndexPaths.removeAll()
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType) {
-        switch type {
-        case .insert:
-            insertedSections.insert(sectionIndex)
-        default:
-            break
-        }
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,
-                    at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let indexPath = newIndexPath {
-                insertedIndexPaths.append(indexPath)
-            }
-        default:
-            break
-        }
+        delegate?.didUpdate()
     }
 }

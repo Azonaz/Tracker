@@ -51,7 +51,6 @@ class TrackersViewController: UIViewController {
 
     private lazy var placeholderImage: UIImageView = {
         let image = UIImageView()
-        image.image = .emptyTrackers
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
@@ -60,7 +59,6 @@ class TrackersViewController: UIViewController {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
-        label.text = trackersPlaceholderText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -172,21 +170,35 @@ class TrackersViewController: UIViewController {
     }
 
     private func updatePlaceholder() {
-        if !categories.isEmpty && visibleCategories.isEmpty {
-            placeholderImage.image = .notFounded
-            placeholderText.text = notFoundedTrackersPlaceholderText
-            placeholderStackView.isHidden = false
-            filterButton.isHidden = true
-            collectionView.isHidden = true
-        } else if categories.isEmpty {
-            placeholderStackView.isHidden = false
-            filterButton.isHidden = true
+        if visibleCategories.isEmpty && searchTextBar.searchTextField.text?.isEmpty == false {
+            showNotFoundedTrackersPlaceholder()
+        } else if visibleCategories.isEmpty {
+            showEmptyTrackersPlaceholder()
         } else {
-            placeholderStackView.isHidden = true
-            collectionView.isHidden = false
-            filterButton.isHidden = false
+            hidePlaceholder()
         }
-        placeholderStackView.isHidden = !visibleCategories.isEmpty
+    }
+
+    private func showEmptyTrackersPlaceholder() {
+        placeholderStackView.isHidden = false
+        placeholderImage.image = .emptyTrackers
+        placeholderText.text = trackersPlaceholderText
+        filterButton.isHidden = true
+        collectionView.isHidden = true
+    }
+
+    private func showNotFoundedTrackersPlaceholder() {
+        placeholderStackView.isHidden = false
+        placeholderImage.image = .notFounded
+        placeholderText.text = notFoundedTrackersPlaceholderText
+        filterButton.isHidden = true
+        collectionView.isHidden = true
+    }
+
+    private func hidePlaceholder() {
+        placeholderStackView.isHidden = true
+        filterButton.isHidden = false
+        collectionView.isHidden = false
     }
 
     private func reloadData() {
@@ -439,11 +451,8 @@ extension TrackersViewController: UICollectionViewDelegate {
 }
 
 extension TrackersViewController: TrackerStoreDelegate {
-    func didUpdate(_ update: TrackerStoreUpdate) {
-        collectionView.performBatchUpdates {
-            collectionView.insertSections(update.insertedSections)
-            collectionView.insertItems(at: update.insertedIndexPaths)
-        }
+    func didUpdate() {
+        reloadData()
     }
 }
 
@@ -484,9 +493,14 @@ extension TrackersViewController: FiltersViewControllerDelegate {
             }
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
-        visibleCategories = filteredCategories
-        updatePlaceholder()
-        collectionView.reloadData()
+        if filteredCategories.isEmpty {
+            showNotFoundedTrackersPlaceholder()
+            filterButton.isHidden = false
+        } else {
+            visibleCategories = filteredCategories
+            updatePlaceholder()
+            collectionView.reloadData()
+        }
     }
 
     private func filterUndoneTrackers() {
@@ -499,8 +513,13 @@ extension TrackersViewController: FiltersViewControllerDelegate {
             }
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
-        visibleCategories = filteredCategories
-        updatePlaceholder()
-        collectionView.reloadData()
+        if filteredCategories.isEmpty {
+            showNotFoundedTrackersPlaceholder()
+            filterButton.isHidden = false
+        } else {
+            visibleCategories = filteredCategories
+            updatePlaceholder()
+            collectionView.reloadData()
+        }
     }
 }
