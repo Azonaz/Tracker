@@ -15,6 +15,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var isPinned: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
+    private var analyticsService = AnalyticsService()
 
     private lazy var trackerView: UIView = {
         let view = UIView()
@@ -207,6 +208,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     @objc
     private func tapCountDayButton() {
+        analyticsService.report(event: .click, parameters: ["screen": "Main", "item": Item.track.rawValue])
         guard let trackerId, let indexPath else {
             assert(false, "ID not found")
             return

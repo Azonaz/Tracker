@@ -10,6 +10,7 @@ class TrackersViewController: UIViewController {
     private var currentDate: Date?
     private var dataSourсe: TrackerCollectionViewDataSourse?
     private var selectedIndexPath: IndexPath?
+    private let analyticsService = AnalyticsService()
 
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
@@ -87,11 +88,21 @@ class TrackersViewController: UIViewController {
         return button
     }()
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        analyticsService.report(event: .open, parameters: ["screen": "Main"])
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         dataSourсe = TrackerCollectionViewDataSourse(viewController: self)
         createView()
         reloadData()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        analyticsService.report(event: .close, parameters: ["screen": "Main"])
     }
 
     func getTrackersRecords(for tracker: Tracker) -> [TrackerRecord] {
@@ -291,6 +302,7 @@ class TrackersViewController: UIViewController {
 
     @objc
     private func tapAddTrackerButton() {
+        analyticsService.report(event: .click, parameters: ["screen": "Main", "item": Item.add_track.rawValue])
         let createTrackerViewController = TrackerTypeViewController()
         createTrackerViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: createTrackerViewController)
@@ -315,6 +327,7 @@ class TrackersViewController: UIViewController {
 
     @objc
     private func tapFilterButton() {
+        analyticsService.report(event: .click, parameters: ["screen": "Main", "item": Item.filter.rawValue])
         let filtersViewController = FiltersViewController()
         filtersViewController.delegate = self
         filtersViewController.selectedFilterIndexPath = filterIndex
@@ -430,10 +443,13 @@ extension TrackersViewController: UICollectionViewDelegate {
                         point: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
             let deleteAction = UIAction(title: deleteText, image: nil) { _ in
+                self.analyticsService.report(event: .click,
+                                             parameters: ["screen": "Main", "item": Item.delete.rawValue])
                 self.alertForDeletingTracker(at: indexPath)
             }
             deleteAction.attributes = [.destructive]
             let editAction = UIAction(title: editText, image: nil) { _ in
+                self.analyticsService.report(event: .click, parameters: ["screen": "Main", "item": Item.edit.rawValue])
                 self.openEditTracker(tracker: self.visibleCategories[indexPath.section].trackers[indexPath.row])
             }
             let pinActionTitle = self.visibleCategories[indexPath.section].trackers[indexPath.row].isPinned

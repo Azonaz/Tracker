@@ -9,6 +9,7 @@ let colorSelection: [UIColor] = [
     .colorSelection7, .colorSelection8, .colorSelection9, .colorSelection10, .colorSelection11, .colorSelection12,
     .colorSelection13, .colorSelection14, .colorSelection15, .colorSelection16, .colorSelection17, .colorSelection18
 ]
+let apiKeyYM: String = "444e6751-0d6b-418d-b180-a7bcb9725f18"
 
 // Onboarding
 let firstPageOnboardingText = NSLocalizedString("firstPageText", comment: "")
