@@ -237,13 +237,9 @@ final class CreateNewTrackerViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        let navigationTitle: String
-        if trackerToEdit != nil {
-            navigationTitle = editHabbitText
-        } else {
-            navigationTitle = isHabit ? newHabbitText : newEventText
-        }
-        navigationItem.title = navigationTitle
+        let standartTitle = isHabit ? newHabbitText : newEventText
+        let isEditTitle = trackerToEdit != nil
+        navigationItem.title = isEditTitle ? editHabbitText : standartTitle
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
@@ -283,7 +279,8 @@ final class CreateNewTrackerViewController: UIViewController {
         for (index, day) in Weekday.allCases.enumerated() where scheduleSubtitle.contains(day) {
             scheduleSelectedDays[index] = true
         }
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             if let emodjiIndexPath = self.selectedIndexEmodjy {
                 self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
                 self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
@@ -341,7 +338,7 @@ extension CreateNewTrackerViewController {
                 try trackerStore.addTracker(newTracker, in: newCategory)
             }
         } catch {
-            assertionFailure("Unable to add tracker")
+            showSaveAlert(message: errorSaveTrackerAlert)
         }
     }
 
@@ -364,8 +361,15 @@ extension CreateNewTrackerViewController {
                 try trackerStore.editTracker(trackerToEdit, in: newCategory)
             }
         } catch {
-            assertionFailure("Unable to edit tracker")
+            showSaveAlert(message: errorSaveTrackerAlert)
         }
+    }
+
+    private func showSaveAlert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
     }
 
     private func checkCreateButton() {

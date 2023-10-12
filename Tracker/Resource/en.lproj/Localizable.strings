@@ -42,6 +42,7 @@
 "newEvent" = "New irregular event";
 "editHabbit" = "Habit editing";
 "saveButton" = "Save";
+"errorSaveTracker" = "Failed to save tracker";
 
 // CategoryViewController
 "categoryPlaceholder" = "Habits and events can be combined by meaning";

@@ -55,6 +55,7 @@ let newHabbitText = NSLocalizedString("newHabbit", comment: "")
 let newEventText = NSLocalizedString("newEvent", comment: "")
 let editHabbitText = NSLocalizedString("editHabbit", comment: "")
 let saveButtonText = NSLocalizedString("saveButton", comment: "")
+let errorSaveTrackerAlert = NSLocalizedString("errorSaveTracker", comment: "")
 
 // CategoryViewController
 let categoryPlaceholderText = NSLocalizedString("categoryPlaceholder", comment: "")

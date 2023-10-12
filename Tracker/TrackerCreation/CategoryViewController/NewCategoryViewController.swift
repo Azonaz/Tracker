@@ -40,13 +40,13 @@ final class NewCategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if let category = categoryToEdit {
-                newCategoryTextField.text = category.title
-                addButton.isEnabled = true
-                addButton.backgroundColor = .ypBlack
-            } else {
-                addButton.isEnabled = false
-                addButton.backgroundColor = .ypGray
-            }
+            newCategoryTextField.text = category.title
+            addButton.isEnabled = true
+            addButton.backgroundColor = .ypBlack
+        } else {
+            addButton.isEnabled = false
+            addButton.backgroundColor = .ypGray
+        }
         newCategoryTextField.delegate = self
         createView()
     }

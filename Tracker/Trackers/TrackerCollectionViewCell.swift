@@ -194,11 +194,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     private func checkPinned() {
-        if isPinned {
-            pinImage.isHidden = false
-        } else {
-            pinImage.isHidden = true
-        }
+        pinImage.isHidden = !isPinned
     }
 
     private func checkDate() {

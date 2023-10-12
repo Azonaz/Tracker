@@ -42,6 +42,7 @@
 "newEvent" = "Новое нерегулярное событие";
 "editHabbit" = "Редактирование привычки";
 "saveButton" = "Сохранить";
+"errorSaveTracker" = "Не удалось сохранить трекер";
 
 // CategoryViewController
 "categoryPlaceholder" = "Привычки и события можно объединить по смыслу";
