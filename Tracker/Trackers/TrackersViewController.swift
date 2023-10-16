@@ -44,9 +44,13 @@ class TrackersViewController: UIViewController {
         collectionView.backgroundColor = .clear
         collectionView.allowsMultipleSelection = false
         collectionView.showsVerticalScrollIndicator = false
+        collectionView.register(TrackerCollectionViewCell.self,
+                                forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
+        collectionView.register(SupplementaryView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: SupplementaryView.reuseIdentifier)
         collectionView.dataSource = dataSourсe
         collectionView.delegate = self
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
@@ -72,7 +76,6 @@ class TrackersViewController: UIViewController {
         stackView.distribution = .equalSpacing
         stackView.addArrangedSubview(placeholderImage)
         stackView.addArrangedSubview(placeholderText)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -84,7 +87,6 @@ class TrackersViewController: UIViewController {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -120,59 +122,32 @@ class TrackersViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        view.addGestureRecognizer(tapGesture)
-        createNavigationBar()
-        createSearchTextField()
-        createTrackersCollectionView()
-        createPlaceholderView()
-        createFilterButton()
-    }
-
-    private func createNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.title = trackersTabTitile
         navigationController?.navigationBar.backgroundColor = .ypWhite
         navigationController?.navigationBar.prefersLargeTitles = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tapGesture)
+        [searchTextBar, collectionView, placeholderStackView, filterButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+        activateConstraints()
     }
 
-    private func createSearchTextField() {
-        view.addSubview(searchTextBar)
+    private func activateConstraints() {
         NSLayoutConstraint.activate([
             searchTextBar.heightAnchor.constraint(equalToConstant: 36),
             searchTextBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchTextBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
-            searchTextBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8)
-        ])
-    }
-
-    private func createTrackersCollectionView() {
-        view.addSubview(collectionView)
-        NSLayoutConstraint.activate([
+            searchTextBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
             collectionView.topAnchor.constraint(equalTo: searchTextBar.bottomAnchor, constant: 34),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
-        ])
-        collectionView.register(TrackerCollectionViewCell.self,
-                                forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
-        collectionView.register(SupplementaryView.self,
-                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                                withReuseIdentifier: SupplementaryView.reuseIdentifier)
-    }
-
-    private func createPlaceholderView() {
-        view.addSubview(placeholderStackView)
-        NSLayoutConstraint.activate([
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             placeholderStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-    }
-
-    private func createFilterButton() {
-        view.addSubview(filterButton)
-        NSLayoutConstraint.activate([
+            placeholderStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             filterButton.heightAnchor.constraint(equalToConstant: 50),

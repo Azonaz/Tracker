@@ -15,7 +15,6 @@ final class OnboardingPageViewController: UIPageViewController {
         button.setTitle(onboardingButtonText, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(tapOnButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -25,7 +24,6 @@ final class OnboardingPageViewController: UIPageViewController {
         pageControl.currentPage = 0
         pageControl.currentPageIndicatorTintColor = .black
         pageControl.pageIndicatorTintColor = .black.withAlphaComponent(0.3)
-        pageControl.translatesAutoresizingMaskIntoConstraints = false
         return pageControl
     }()
 
@@ -40,8 +38,9 @@ final class OnboardingPageViewController: UIPageViewController {
     }
 
     private func createView() {
-        view.addSubview(pageControl)
-        view.addSubview(onButton)
+        [pageControl, onButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0) }
         activateConstrants()
     }
 

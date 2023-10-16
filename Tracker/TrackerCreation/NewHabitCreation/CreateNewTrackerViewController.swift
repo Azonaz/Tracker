@@ -86,7 +86,6 @@ final class CreateNewTrackerViewController: UIViewController {
         stackView.alignment = .center
         stackView.addArrangedSubview(nameTextField)
         stackView.addArrangedSubview(errorLabel)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -97,7 +96,6 @@ final class CreateNewTrackerViewController: UIViewController {
         tableView.dataSource = tableViewDataSource
         tableView.delegate = tableViewDelegate
         tableView.register(NewTrackerSubtitleCell.self, forCellReuseIdentifier: NewTrackerSubtitleCell.reuseIdentifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
 
@@ -114,7 +112,6 @@ final class CreateNewTrackerViewController: UIViewController {
         collectionView.register(NewTrackerCollectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
@@ -131,7 +128,6 @@ final class CreateNewTrackerViewController: UIViewController {
         collectionView.register(NewTrackerCollectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
@@ -167,7 +163,6 @@ final class CreateNewTrackerViewController: UIViewController {
         buttonStack.distribution = .fillEqually
         buttonStack.addArrangedSubview(cancelButton)
         buttonStack.addArrangedSubview(createButton)
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
         return buttonStack
     }()
 
@@ -253,11 +248,10 @@ final class CreateNewTrackerViewController: UIViewController {
                 recordsQuantity.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
                 recordsQuantity.heightAnchor.constraint(equalToConstant: 38)
             ])}
-        containView.addSubview(textFieldStackView)
-        containView.addSubview(habitTableView)
-        containView.addSubview(buttonStackView)
-        containView.addSubview(emodjiCollectionView)
-        containView.addSubview(colorCollectionView)
+        [textFieldStackView, habitTableView, buttonStackView, emodjiCollectionView, colorCollectionView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            containView.addSubview($0)
+        }
         activateConstraints()
     }
 

@@ -6,7 +6,6 @@ final class StatisticCardView: UIView {
         let label = UILabel()
         label.textColor = .ypBlack
         label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
@@ -14,7 +13,6 @@ final class StatisticCardView: UIView {
         let label = UILabel()
         label.textColor = .ypBlack
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
@@ -36,8 +34,10 @@ final class StatisticCardView: UIView {
         backgroundColor = .clear
         layer.borderWidth = 1
         layer.cornerRadius = 16
-        addSubview(resultLabel)
-        addSubview(descriptionLabel)
+        [resultLabel, descriptionLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            addSubview($0)
+        }
         activateConstraints()
     }
 

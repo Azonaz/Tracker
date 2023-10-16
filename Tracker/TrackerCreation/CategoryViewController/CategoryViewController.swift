@@ -36,7 +36,6 @@ final class CategoryViewController: UIViewController {
         stackView.distribution = .equalSpacing
         stackView.addArrangedSubview(placeholderImage)
         stackView.addArrangedSubview(placeholderText)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -47,7 +46,6 @@ final class CategoryViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.reuseIdentifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
 
@@ -58,7 +56,6 @@ final class CategoryViewController: UIViewController {
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.addTarget(nil, action: #selector(tapAddButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -93,9 +90,10 @@ final class CategoryViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(placeholderStackView)
-        view.addSubview(tableView)
-        view.addSubview(addCategoryButton)
+        [placeholderStackView, tableView, addCategoryButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 

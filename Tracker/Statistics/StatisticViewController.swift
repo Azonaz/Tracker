@@ -11,7 +11,6 @@ final class StatisticViewController: UIViewController {
         stackView.spacing = 8
         stackView.alignment = .fill
         stackView.distribution = .fillEqually
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -39,7 +38,6 @@ final class StatisticViewController: UIViewController {
         stackView.distribution = .equalSpacing
         stackView.addArrangedSubview(placeholderImage)
         stackView.addArrangedSubview(placeholderText)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -59,8 +57,10 @@ final class StatisticViewController: UIViewController {
         title = NSLocalizedString("statistic", comment: "")
         navigationController?.navigationBar.backgroundColor = .ypWhite
         navigationController?.navigationBar.prefersLargeTitles = true
-        view.addSubview(placeholderStackView)
-        view.addSubview(statisticCardStackView)
+        [placeholderStackView, statisticCardStackView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 

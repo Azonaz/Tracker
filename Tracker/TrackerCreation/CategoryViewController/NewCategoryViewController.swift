@@ -22,7 +22,6 @@ final class NewCategoryViewController: UIViewController {
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.delegate = self
-        textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
 
@@ -33,7 +32,6 @@ final class NewCategoryViewController: UIViewController {
         button.layer.cornerRadius = 16
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         button.addTarget(nil, action: #selector(tapAddButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -70,8 +68,10 @@ final class NewCategoryViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(newCategoryTextField)
-        view.addSubview(addButton)
+        [newCategoryTextField, addButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 
