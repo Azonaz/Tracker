@@ -1,0 +1,81 @@
+// Onboarding
+"firstPageText" = "Track only what you want";
+"secondPageText" = "Even if it's not liters of water and yoga";
+"onboardingButton" = "What a technology!";
+
+// TabBar
+"trackers" = "Trackers";
+"statistic" = "Statistics";
+
+// TrackersViewController
+"trackersPlaceholderText" = "What will we track?";
+"notFoundedTrackersPlaceholderText" = "Nothing found";
+"searchBarPlaceholder" = "Search";
+"filters" = "Filters";
+"pin" = "Pin";
+"unpin" = "Unpin";
+"trackerDeleteAlert" = "Are you sure you want to delete the tracker?";
+"pinnedTrackers" = "Pinned";
+
+// FiltersViewController
+"allTrackers" = "All trackers";
+"todayTrackers" = "Trackers for today";
+"doneTrackers" = "Completed";
+"undoneTrackers" = "Not completed";
+
+// TrackerTypeViewController
+"habitButton" = "Habit";
+"eventButton" = "Irregular event";
+"trackerCreate" = "Creating a tracker";
+
+// CreateNewTrackerViewController
+"collectionViewEmodji" = "Emodji";
+"collectionViewColor" = "Color";
+"category" = "Category";
+"schedule" = "Schedule";
+"newTrackerTextBarPlaceholder" = "Enter tracker name";
+"errorLabel" = "Limit 38 characters";
+"cancelButton" = "Cancel";
+"createButton" = "Create";
+"everyDay" = "Every day";
+"newHabbit" = "New habit";
+"newEvent" = "New irregular event";
+"editHabbit" = "Habit editing";
+"saveButton" = "Save";
+"errorSaveTracker" = "Failed to save tracker";
+
+// CategoryViewController
+"categoryPlaceholder" = "Habits and events can be combined by meaning";
+"addCategory" = "Add category";
+"editCategory" = "Edit";
+"deleteCategory" = "Delete";
+"categoryDeleteAlert" = "Are you sure this category is not needed?";
+"editingCategory" = "Editing category";
+
+// NewCategoryViewController
+"newCategoryTextPlaceholder" = "Enter category name";
+"newCategory" = "New category";
+"readyButton" = "Ready";
+
+// StatisticViewController
+"statisticPlaceholder" = "There is nothing to analyze yet";
+"bestPeriod" = "Best period";
+"perfectDays" = "Ideal days";
+"trackersСompleted" = "Trackers completed";
+"averageValue" = "Average value";
+
+// Weekday
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+"mon" = "Mon";
+"tue" = "Tue";
+"wed" = "Wed";
+"thu" = "Thu";
+"fri" = "Fri";
+"sat" = "Sat";
+"sun" = "Sun";

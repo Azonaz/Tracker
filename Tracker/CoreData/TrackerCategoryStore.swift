@@ -1,12 +1,8 @@
 import Foundation
 import CoreData
 
-struct TrackerCategoryStoreUpdate {
-    let insertedIndexPaths: [IndexPath]
-}
-
 protocol TrackerCategoryStoreDelegate: AnyObject {
-    func didUpdate(_ update: TrackerCategoryStoreUpdate)
+    func didUpdateCategoriesList()
 }
 
 protocol TrackerCategoryStoreDataProviderProtocol {
@@ -16,6 +12,8 @@ protocol TrackerCategoryStoreDataProviderProtocol {
 protocol TrackerCategoryStoreProtocol {
     func getTrackerCategories() throws -> [TrackerCategory]
     func addTrackerCategory(_ category: TrackerCategory) throws
+    func editTrackerCategory(_ category: TrackerCategory, with newTitle: String) throws
+    func deleteTrackerCategory(_ category: TrackerCategory)
 }
 
 final class TrackerCategoryStore: NSObject {
@@ -23,7 +21,6 @@ final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
     private let request = TrackerCategoryCD.fetchRequest()
     private let uiColorMarshalling = UIColorMarshalling()
-    private var insertedIndexPaths: [IndexPath] = []
 
     private lazy var trackerStore: TrackerStore = {
         TrackerStore(context: context)
@@ -55,11 +52,9 @@ final class TrackerCategoryStore: NSObject {
 private extension TrackerCategoryStore {
 
     func fetchTrackerCategories() throws -> [TrackerCategory] {
-        guard let objects = fetchedResultsController.fetchedObjects else {
-            throw StoreError.fetchError
-        }
-        let categories = try objects.map { try getTrackerCategory(from: $0) }
-        return categories
+        request.predicate = NSPredicate(format: "title != nil")
+        let categories = try context.fetch(request)
+        return try categories.map { try getTrackerCategory(from: $0) }
     }
 
     func fetchTrackerCategoryCoreData(for category: TrackerCategory) throws -> TrackerCategoryCD {
@@ -100,6 +95,46 @@ private extension TrackerCategoryStore {
         categoryCD.trackers = NSSet()
         try context.save()
     }
+
+    func deleteSelectedTrackerCategory(_ category: TrackerCategory) throws {
+        request.predicate = NSPredicate(format: "title == %@", category.title)
+        do {
+            let categoryCD = try context.fetch(request).first
+            guard let categoryToDelete = categoryCD else {
+                throw StoreError.fetchError
+            }
+            if let trackers = categoryToDelete.trackers as? Set<TrackerCD> {
+                for tracker in trackers {
+                    let recordsRequest = NSFetchRequest<TrackerRecordCD>(entityName: "TrackerRecordCD")
+                    recordsRequest.predicate = NSPredicate(format: "id = %@", tracker.id! as any CVarArg)
+                    let deletedTracker = try context.fetch(recordsRequest)
+                    deletedTracker.forEach { context.delete($0) }
+                    let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+                    request.predicate = NSPredicate(format: "id = %@", tracker.id! as any CVarArg)
+                    do {
+                        let deletesTrackers = try context.fetch(request)
+                        deletesTrackers.forEach { context.delete($0) }
+                        try context.save()
+                    } catch {
+                        throw StoreError.deleteError
+                    }
+                }
+            }
+            context.delete(categoryToDelete)
+            try context.save()
+        } catch {
+            throw StoreError.deleteError
+        }
+    }
+
+    func editTrackerCategoryCD(for oldCategory: TrackerCategory, with newTitle: String) throws {
+        request.predicate = NSPredicate(format: "title == %@", oldCategory.title)
+        guard let categoryCD = try context.fetch(request).first else {
+            throw StoreError.fetchError
+        }
+        categoryCD.title = newTitle
+        try context.save()
+    }
 }
 
 extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, TrackerCategoryStoreProtocol {
@@ -115,28 +150,19 @@ extension TrackerCategoryStore: TrackerCategoryStoreDataProviderProtocol, Tracke
     func addTrackerCategory(_ category: TrackerCategory) throws {
         try addNewTrackerCategory(category)
     }
+
+    func deleteTrackerCategory(_ category: TrackerCategory) {
+        try? deleteSelectedTrackerCategory(category)
+    }
+
+    func editTrackerCategory(_ oldCategory: TrackerCategory, with newTitle: String) throws {
+        try editTrackerCategoryCD(for: oldCategory, with: newTitle)
+    }
 }
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
 
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedIndexPaths.removeAll()
-    }
-
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.didUpdate(TrackerCategoryStoreUpdate(insertedIndexPaths: insertedIndexPaths))
-        insertedIndexPaths.removeAll()
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,
-                    at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let indexPath = newIndexPath {
-                insertedIndexPaths.append(indexPath)
-            }
-        default:
-            break
-        }
+        delegate?.didUpdateCategoriesList()
     }
 }

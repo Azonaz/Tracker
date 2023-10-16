@@ -6,22 +6,21 @@ protocol UpdateCellSubtitleDelegate: AnyObject {
 }
 
 final class CreateNewTrackerViewController: UIViewController {
-
     weak var delegate: TrackerCollectionViewCellDelegate?
     var indexCategory: IndexPath?
+    var trackerToEdit: Tracker?
+    var categoryEditTracker: String?
+    var recordsLabel: String?
+    private let colorMarshalling = UIColorMarshalling()
     private let trackerStore: TrackerStoreProtocol = TrackerStore()
     let trackerCategoryStore: TrackerCategoryStoreProtocol = TrackerCategoryStore()
-    private let collectionViewHeaders = ["Emodji", "Цвет"]
+    private let collectionViewHeaders = [headerCollectionViewEmodji, headerCollectionViewColor]
     private var tableTitles: [String] = []
     private var isHabit: Bool
-    private lazy var titleCells: [String] = {
-        isHabit ? ["Категория", "Расписание"] : ["Категория"]
-    }()
+    private lazy var titleCells: [String] = { isHabit ? [headerCategory, headerSchedule] : [headerCategory] }()
     private var trackerTitle: String = ""
     private var categorySubtitle: String = ""
-    private lazy var scheduleSubtitle: [Weekday] = {
-        isHabit ? [] : Weekday.allCases
-    }()
+    private lazy var scheduleSubtitle: [Weekday] = { isHabit ? [] : Weekday.allCases }()
     private var scheduleSelectedDays: [Int: Bool] = [:]
     private var tableViewDataSource: NewTrackerDataSource?
     private var tableViewDelegate: NewTrackerDelegate?
@@ -29,6 +28,8 @@ final class CreateNewTrackerViewController: UIViewController {
     private var color: UIColor?
     private var selectedIndexEmodjy: IndexPath?
     private var selectedIndexColor: IndexPath?
+    private var checkButtonText: String = ""
+    private var trackerToEditID = UUID()
 
     private lazy var scrollView: UIScrollView = {
        let scrollView = UIScrollView()
@@ -44,6 +45,15 @@ final class CreateNewTrackerViewController: UIViewController {
         return view
     }()
 
+    private lazy var recordsQuantity: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textColor = .ypBlack
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .ypBackground
@@ -52,7 +62,8 @@ final class CreateNewTrackerViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
         let attribute: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
-        textField.attributedPlaceholder = NSAttributedString(string: "Введите название трекера", attributes: attribute)
+        textField.attributedPlaceholder = NSAttributedString(string: newTrackerTextBarPlaceholderText,
+                                                             attributes: attribute)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.delegate = self
@@ -64,7 +75,7 @@ final class CreateNewTrackerViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         label.textColor = .ypRed
         label.isHidden = true
-        label.text = "Ограничение 38 символов"
+        label.text = errorLabelText
         label.textAlignment = .center
         return label
     }()
@@ -75,7 +86,6 @@ final class CreateNewTrackerViewController: UIViewController {
         stackView.alignment = .center
         stackView.addArrangedSubview(nameTextField)
         stackView.addArrangedSubview(errorLabel)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -86,7 +96,6 @@ final class CreateNewTrackerViewController: UIViewController {
         tableView.dataSource = tableViewDataSource
         tableView.delegate = tableViewDelegate
         tableView.register(NewTrackerSubtitleCell.self, forCellReuseIdentifier: NewTrackerSubtitleCell.reuseIdentifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
 
@@ -103,7 +112,6 @@ final class CreateNewTrackerViewController: UIViewController {
         collectionView.register(NewTrackerCollectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
@@ -120,7 +128,6 @@ final class CreateNewTrackerViewController: UIViewController {
         collectionView.register(NewTrackerCollectionHeader.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: NewTrackerCollectionHeader.reuseIdentifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
@@ -130,7 +137,7 @@ final class CreateNewTrackerViewController: UIViewController {
         button.layer.borderWidth = 1
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.ypRed, for: .normal)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(cancelButtonText, for: .normal)
         button.layer.borderColor = UIColor.ypRed.cgColor
         button.addTarget(self, action: #selector(tapCancelButton), for: .touchUpInside)
         return button
@@ -142,7 +149,7 @@ final class CreateNewTrackerViewController: UIViewController {
         button.backgroundColor = .ypGray
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(.ypWhite, for: .normal)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(checkButtonText, for: .normal)
         button.isEnabled = false
         button.addTarget(self, action: #selector(tapCreateButton), for: .touchUpInside)
         return button
@@ -156,7 +163,6 @@ final class CreateNewTrackerViewController: UIViewController {
         buttonStack.distribution = .fillEqually
         buttonStack.addArrangedSubview(cancelButton)
         buttonStack.addArrangedSubview(createButton)
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
         return buttonStack
     }()
 
@@ -176,31 +182,13 @@ final class CreateNewTrackerViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tapGesture.cancelsTouchesInView = false
         scrollView.addGestureRecognizer(tapGesture)
-        createView()
-    }
-
-    func getCellTitles() -> [String] {
-        titleCells
-    }
-
-    func getCategorySubtitle() -> String {
-        categorySubtitle
-    }
-
-    func getSchedule() -> [Weekday] {
-        scheduleSubtitle
-    }
-
-    func getScheduleSelectedDays() -> [Int: Bool] {
-        scheduleSelectedDays
-    }
-
-    func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
-        if scheduleSelectedDays == Weekday.allCases {
-            return "Каждый день"
+        if trackerToEdit != nil {
+            checkButtonText = saveButtonText
         } else {
-            return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
+            checkButtonText = createButtonText
         }
+        createView()
+        createEditTrackerView()
     }
 
     private func activateConstraints() {
@@ -214,7 +202,8 @@ final class CreateNewTrackerViewController: UIViewController {
             containView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             containView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             containView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            textFieldStackView.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
+            textFieldStackView.topAnchor.constraint(equalTo: trackerToEdit != nil ? recordsQuantity.bottomAnchor
+                                                    : containView.topAnchor, constant: 24),
             textFieldStackView.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
             textFieldStackView.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -243,18 +232,85 @@ final class CreateNewTrackerViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = isHabit ? "Новая привычка" : "Новое нерегулярное событие"
+        let standartTitle = isHabit ? newHabbitText : newEventText
+        let isEditTitle = trackerToEdit != nil
+        navigationItem.title = isEditTitle ? editHabbitText : standartTitle
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
         view.addSubview(scrollView)
         scrollView.addSubview(containView)
-        containView.addSubview(textFieldStackView)
-        containView.addSubview(habitTableView)
-        containView.addSubview(buttonStackView)
-        containView.addSubview(emodjiCollectionView)
-        containView.addSubview(colorCollectionView)
+        if trackerToEdit != nil {
+            containView.addSubview(recordsQuantity)
+            NSLayoutConstraint.activate([
+                recordsQuantity.topAnchor.constraint(equalTo: containView.topAnchor, constant: 24),
+                recordsQuantity.leadingAnchor.constraint(equalTo: containView.leadingAnchor, constant: 16),
+                recordsQuantity.trailingAnchor.constraint(equalTo: containView.trailingAnchor, constant: -16),
+                recordsQuantity.heightAnchor.constraint(equalToConstant: 38)
+            ])}
+        [textFieldStackView, habitTableView, buttonStackView, emodjiCollectionView, colorCollectionView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            containView.addSubview($0)
+        }
         activateConstraints()
+    }
+
+    private func createEditTrackerView() {
+        guard let tracker = trackerToEdit else { return }
+        trackerToEditID = tracker.id
+        nameTextField.text = tracker.title
+        recordsQuantity.text = recordsLabel
+        categorySubtitle = categoryEditTracker ?? ""
+        scheduleSubtitle = tracker.schedule
+        if let emodjiIndex = emodjies.firstIndex(of: tracker.emodji) {
+            selectedIndexEmodjy = IndexPath(row: emodjiIndex, section: 0)
+        }
+        if let colorIndex = colorSelection.firstIndex(where: {
+            colorMarshalling.getHexString(from: $0) == colorMarshalling.getHexString(from: tracker.color)
+        }) {
+            selectedIndexColor = IndexPath(row: colorIndex, section: 0)
+        }
+        for (index, day) in Weekday.allCases.enumerated() where scheduleSubtitle.contains(day) {
+            scheduleSelectedDays[index] = true
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if let emodjiIndexPath = self.selectedIndexEmodjy {
+                self.emodjiCollectionView.selectItem(at: emodjiIndexPath, animated: false, scrollPosition: [])
+                self.collectionView(self.emodjiCollectionView, didSelectItemAt: emodjiIndexPath)
+            }
+            if let colorIndexPath = self.selectedIndexColor {
+                self.colorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
+                self.collectionView(self.colorCollectionView, didSelectItemAt: colorIndexPath)
+            }
+        }
+        checkCreateButton()
+    }
+}
+
+extension CreateNewTrackerViewController {
+    func getCellTitles() -> [String] {
+        titleCells
+    }
+
+    func getCategorySubtitle() -> String {
+        categorySubtitle
+    }
+
+    func getSchedule() -> [Weekday] {
+        scheduleSubtitle
+    }
+
+    func getScheduleSelectedDays() -> [Int: Bool] {
+        scheduleSelectedDays
+    }
+
+    func getScheduleSubtitle(from scheduleSelectedDays: [Weekday]) -> String {
+        if scheduleSelectedDays == Weekday.allCases {
+            return everyDayText
+        } else {
+            return scheduleSelectedDays.compactMap { $0.weekdayShortName }.joined(separator: ", ")
+        }
     }
 
     private func createTracker() {
@@ -263,7 +319,8 @@ final class CreateNewTrackerViewController: UIViewController {
                                  title: nameTextField.text ?? "",
                                  color: color ?? UIColor(),
                                  emodji: emodji ?? String(),
-                                 schedule: scheduleSubtitle)
+                                 schedule: scheduleSubtitle,
+                                 isPinned: false)
         do {
             let categories = try trackerCategoryStore.getTrackerCategories()
             if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
@@ -275,8 +332,38 @@ final class CreateNewTrackerViewController: UIViewController {
                 try trackerStore.addTracker(newTracker, in: newCategory)
             }
         } catch {
-            assertionFailure("Unable to add tracker")
+            showSaveAlert(message: errorSaveTrackerAlert)
         }
+    }
+
+    private func editTracker(id: UUID) {
+        let categoryTitle = categorySubtitle
+        let trackerToEdit = Tracker(id: id,
+                                    title: nameTextField.text ?? "",
+                                    color: color ?? UIColor(),
+                                    emodji: emodji ?? String(),
+                                    schedule: scheduleSubtitle,
+                                    isPinned: false)
+        do {
+            let categories = try trackerCategoryStore.getTrackerCategories()
+            if let foundCategory = categories.first(where: { $0.title == categoryTitle }) {
+                let updatedCategoryTrackers = foundCategory.trackers + [trackerToEdit]
+                let updatedCategory = TrackerCategory(title: foundCategory.title, trackers: updatedCategoryTrackers)
+                try trackerStore.editTracker(trackerToEdit, in: updatedCategory)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [trackerToEdit])
+                try trackerStore.editTracker(trackerToEdit, in: newCategory)
+            }
+        } catch {
+            showSaveAlert(message: errorSaveTrackerAlert)
+        }
+    }
+
+    private func showSaveAlert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
     }
 
     private func checkCreateButton() {
@@ -297,7 +384,11 @@ final class CreateNewTrackerViewController: UIViewController {
 
     @objc
     private func tapCreateButton() {
-        createTracker()
+        if trackerToEdit != nil {
+            editTracker(id: trackerToEditID)
+        } else {
+            createTracker()
+        }
         delegate?.updateTrackers()
         var currentViewController = self.presentingViewController
         while currentViewController is UINavigationController {
@@ -312,7 +403,6 @@ final class CreateNewTrackerViewController: UIViewController {
 }
 
 extension CreateNewTrackerViewController: UITextFieldDelegate {
-
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         view.endEditing(true)

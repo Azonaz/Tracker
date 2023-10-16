@@ -4,7 +4,6 @@ final class OnboardingViewController: UIViewController {
     private let pageImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
 
@@ -15,7 +14,6 @@ final class OnboardingViewController: UIViewController {
         label.textAlignment = .center
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
@@ -35,8 +33,10 @@ final class OnboardingViewController: UIViewController {
     }
 
     private func createView() {
-        view.addSubview(pageImageView)
-        view.addSubview(textLabel)
+        [pageImageView, textLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstrants()
     }
 

@@ -2,10 +2,12 @@ import UIKit
 
 protocol NewCategoryViewControllerDelegate: AnyObject {
     func updateCategoriesList(with category: TrackerCategory)
+    func editCategory(with newTitle: String)
 }
 
 final class NewCategoryViewController: UIViewController {
     weak var delegate: NewCategoryViewControllerDelegate?
+    var categoryToEdit: TrackerCategory?
 
     private lazy var newCategoryTextField: UITextField = {
         let textField = UITextField()
@@ -15,31 +17,35 @@ final class NewCategoryViewController: UIViewController {
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
         let attributes: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.ypGray]
-        textField.attributedPlaceholder = NSAttributedString(string: "Введите название категории",
-                                                             attributes: attributes)
+        textField.attributedPlaceholder =
+        NSAttributedString(string: newCategoryTextBarPlaceholderText, attributes: attributes)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
         textField.delegate = self
-        textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
 
     private let addButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(readyButtonText, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         button.addTarget(nil, action: #selector(tapAddButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let category = categoryToEdit {
+            newCategoryTextField.text = category.title
+            addButton.isEnabled = true
+            addButton.backgroundColor = .ypBlack
+        } else {
+            addButton.isEnabled = false
+            addButton.backgroundColor = .ypGray
+        }
         newCategoryTextField.delegate = self
-        addButton.isEnabled = false
-        addButton.backgroundColor = .ypGray
         createView()
     }
 
@@ -58,22 +64,28 @@ final class NewCategoryViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Новая категория"
+        navigationItem.title = categoryToEdit != nil ? editCategoryTitle : newCategoryTitle
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(newCategoryTextField)
-        view.addSubview(addButton)
+        [newCategoryTextField, addButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 
     @objc
     private func tapAddButton() {
         if let text = newCategoryTextField.text, !text.isEmpty {
-            let category = TrackerCategory(title: text, trackers: [])
-            delegate?.updateCategoriesList(with: category)
+            if categoryToEdit != nil {
+                delegate?.editCategory(with: text)
+            } else {
+                let category = TrackerCategory(title: text, trackers: [])
+                delegate?.updateCategoriesList(with: category)
+            }
+            dismiss(animated: true)
         }
-        dismiss(animated: true)
     }
 }
 

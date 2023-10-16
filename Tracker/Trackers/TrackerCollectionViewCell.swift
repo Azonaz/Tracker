@@ -12,8 +12,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCollectionViewCellDelegate?
     private let currentDate: Date? = nil
     private var isDoneToday: Bool = false
+    private var isPinned: Bool = false
     private var trackerId: UUID?
     private var indexPath: IndexPath?
+    private var analyticsService = AnalyticsService()
 
     private lazy var trackerView: UIView = {
         let view = UIView()
@@ -24,7 +26,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .ypWhite
+        label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -79,8 +81,19 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
 
-    func configure(with tracker: Tracker, isDoneToday: Bool, doneDays: Int, at indexPath: IndexPath) {
+    private lazy var pinImage: UIImageView = {
+        let view = UIImageView()
+        view.image = .pinImage
+        view.contentMode = .center
+        view.tintColor = .white
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    func configure(with tracker: Tracker, isDoneToday: Bool, isPinned: Bool, doneDays: Int, at indexPath: IndexPath) {
         self.isDoneToday = isDoneToday
+        self.isPinned = isPinned
         self.trackerId = tracker.id
         self.indexPath = indexPath
         let color = tracker.color
@@ -92,6 +105,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let daysText = getDaysText(doneDays)
         countDayLabel.text = daysText
         checkDoneToday()
+        checkPinned()
         checkDate()
     }
 
@@ -99,6 +113,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         addTrackerView()
         addStackView()
         addEmojiLabel()
+        addPinImage()
         addTrackerTitleLabel()
         addCounterDayLabel()
         addCountDayButton()
@@ -133,6 +148,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 
+    private func addPinImage() {
+        trackerView.addSubview(pinImage)
+        NSLayoutConstraint.activate([
+            pinImage.widthAnchor.constraint(equalToConstant: 24),
+            pinImage.heightAnchor.constraint(equalToConstant: 24),
+            pinImage.topAnchor.constraint(equalTo: trackerView.topAnchor, constant: 12),
+            pinImage.trailingAnchor.constraint(equalTo: trackerView.trailingAnchor, constant: -12)
+        ])
+    }
+
     private func addTrackerTitleLabel() {
         trackerView.addSubview(titleLabel)
         NSLayoutConstraint.activate([
@@ -155,18 +180,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    private func getDaysText(_ doneDays: Int) -> String {
-        let lastTwoDayDigits = doneDays % 100
-        let lastDayDigit = doneDays % 10
-        if lastTwoDayDigits >= 11 && lastTwoDayDigits <= 19 {
-            return "\(doneDays) дней"
-        } else if lastDayDigit == 1 {
-            return "\(doneDays) день"
-        } else if lastDayDigit >= 2 && lastDayDigit <= 4 {
-            return "\(doneDays) дня"
-        } else {
-            return "\(doneDays) дней"
-        }
+    func getDaysText(_ doneDays: Int) -> String {
+        let formatDaysString: String = NSLocalizedString("daysAmount", comment: "")
+        let resultDaysString: String = String.localizedStringWithFormat(formatDaysString, doneDays)
+        return resultDaysString
     }
 
     private func checkDoneToday() {
@@ -176,6 +193,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         countDayButton.layer.opacity = opacity
     }
 
+    private func checkPinned() {
+        pinImage.isHidden = !isPinned
+    }
+
     private func checkDate() {
         let selectedDate = delegate?.getSelectedDate() ?? Date()
         countDayButton.isEnabled = selectedDate <= currentDate ?? Date()
@@ -183,6 +204,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     @objc
     private func tapCountDayButton() {
+        analyticsService.report(event: .click, parameters: ["screen": "Main", "item": Item.track.rawValue])
         guard let trackerId, let indexPath else {
             assert(false, "ID not found")
             return

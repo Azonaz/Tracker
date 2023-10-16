@@ -30,3 +30,9 @@ extension UIColor {
     static var colorSelection17: UIColor { UIColor(named: "ColorSelection17") ?? UIColor.red }
     static var colorSelection18: UIColor { UIColor(named: "ColorSelection18") ?? UIColor.red }
 }
+
+extension UIColor {
+    static let gradientBlue = UIColor(named: "GradientBlue") ?? .blue
+    static let gradientRed = UIColor(named: "GradientRed") ?? .red
+    static let gradientGreen = UIColor(named: "GradientGreen") ?? .green
+}

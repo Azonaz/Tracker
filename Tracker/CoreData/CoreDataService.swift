@@ -5,6 +5,7 @@ enum StoreError: Error {
     case fetchError
     case decodingError
     case initError
+    case deleteError
 }
 
 protocol CoreDataSavable {

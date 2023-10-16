@@ -14,7 +14,7 @@ final class ScheduleViewDataSource: NSObject, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleCell.reuseIdentifier, for: indexPath)
         guard let viewController, let weekdayCell = cell as? ScheduleCell else { return UITableViewCell() }
-        let title = viewController.getWeekdays()[indexPath.row].rawValue
+        let title = viewController.getWeekdays()[indexPath.row]
         let isFirstRow = indexPath.row == 0
         let isLastRow = indexPath.row == viewController.getWeekdays().count - 1
         weekdayCell.configure(with: title,

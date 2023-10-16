@@ -20,10 +20,7 @@ final class CategoryViewController: UIViewController {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = 8
         paragraphStyle.alignment = .center
-        let attributedText = NSMutableAttributedString(string: """
-                                                               Привычки и события можно
-                                                               объединить по смыслу
-                                                               """)
+        let attributedText = NSMutableAttributedString(string: categoryPlaceholderText)
         attributedText.addAttribute(.paragraphStyle, value: paragraphStyle,
                                     range: NSRange(location: 0, length: attributedText.length))
         label.attributedText = attributedText
@@ -39,7 +36,6 @@ final class CategoryViewController: UIViewController {
         stackView.distribution = .equalSpacing
         stackView.addArrangedSubview(placeholderImage)
         stackView.addArrangedSubview(placeholderText)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
@@ -50,18 +46,16 @@ final class CategoryViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.reuseIdentifier)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
 
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(addCategoryButtonText, for: .normal)
         button.backgroundColor = .ypBlack
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
         button.addTarget(nil, action: #selector(tapAddButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -92,13 +86,14 @@ final class CategoryViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Категория"
+        navigationItem.title = headerCategory
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(placeholderStackView)
-        view.addSubview(tableView)
-        view.addSubview(addCategoryButton)
+        [placeholderStackView, tableView, addCategoryButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 
@@ -110,6 +105,25 @@ final class CategoryViewController: UIViewController {
             tableView.isHidden = false
             placeholderStackView.isHidden = true
         }
+    }
+
+    func alertForDeletingCategory(at indexPath: IndexPath) {
+        let alert = UIAlertController(title: categoryDeleteAlertText, message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: deleteText, style: .destructive) { _ in
+            self.viewModel.deleteCategory(at: indexPath)
+        }
+        let cancelAction = UIAlertAction(title: cancelButtonText, style: .cancel)
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true)
+    }
+
+    func openEditCategory(category: TrackerCategory) {
+        let newCategoryViewController = NewCategoryViewController()
+        newCategoryViewController.delegate = self
+        newCategoryViewController.categoryToEdit = category
+        let navigationController = UINavigationController(rootViewController: newCategoryViewController)
+        self.present(navigationController, animated: true)
     }
 
     @objc
@@ -138,6 +152,21 @@ extension CategoryViewController: UITableViewDelegate {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         }
     }
+
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
+        selectedIndexPath = indexPath
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let deleteAction = UIAction(title: deleteText, image: nil) { _ in
+                self.alertForDeletingCategory(at: indexPath)
+            }
+            deleteAction.attributes = [.destructive]
+            return UIMenu(title: "", children: [UIAction(title: editText, image: nil) { _ in
+                self.openEditCategory(category: self.viewModel.getCategory(at: indexPath))
+            },
+                                                deleteAction])
+        }
+    }
 }
 
 extension CategoryViewController: UITableViewDataSource {
@@ -164,5 +193,11 @@ extension CategoryViewController: UITableViewDataSource {
 extension CategoryViewController: NewCategoryViewControllerDelegate {
     func updateCategoriesList(with category: TrackerCategory) {
         viewModel.addCategory(category)
+    }
+
+    func editCategory(with newTitle: String) {
+        if let indexPath = selectedIndexPath {
+            viewModel.editCategory(at: indexPath, with: newTitle)
+        }
     }
 }

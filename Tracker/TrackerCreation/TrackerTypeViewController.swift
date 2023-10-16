@@ -7,7 +7,7 @@ final class TrackerTypeViewController: UIViewController {
        let button = UIButton()
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
-        button.setTitle("Привычка", for: .normal)
+        button.setTitle(habitButtonText, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.addTarget(self, action: #selector(tapHabitButton), for: .touchUpInside)
@@ -18,7 +18,7 @@ final class TrackerTypeViewController: UIViewController {
        let button = UIButton()
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
-        button.setTitle("Нерегулярное событие", for: .normal)
+        button.setTitle(eventButtonText, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.addTarget(self, action: #selector(tapEventButton), for: .touchUpInside)
@@ -52,7 +52,7 @@ final class TrackerTypeViewController: UIViewController {
     }
 
     private func createView() {
-        navigationItem.title = "Создание трекера"
+        navigationItem.title = trackerCreateButtonText
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:
                                                                     UIColor.ypBlack]
         view.backgroundColor = .ypWhite

@@ -13,7 +13,6 @@ final class ScheduleViewController: UIViewController {
         tableView.dataSource = dataSource
         tableView.register(ScheduleCell.self, forCellReuseIdentifier: ScheduleCell.reuseIdentifier)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
 
@@ -21,11 +20,10 @@ final class ScheduleViewController: UIViewController {
         let button = UIButton()
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(readyButtonText, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.addTarget(self, action: #selector(tapAddButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
@@ -50,18 +48,19 @@ final class ScheduleViewController: UIViewController {
 
     private func createView() {
         view.backgroundColor = .ypWhite
-        navigationItem.title = "Расписание"
+        navigationItem.title = headerSchedule
         navigationController?.navigationBar.titleTextAttributes = [
             NSAttributedString.Key.foregroundColor: UIColor.ypBlack]
         navigationItem.hidesBackButton = true
-        view.addSubview(tableView)
-        view.addSubview(addButton)
+        [tableView, addButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
         activateConstraints()
     }
 
-    func getWeekdays() -> [Weekday] {
-        let daysList: [Weekday] = Weekday.allCases
-        return daysList
+    func getWeekdays() -> [String] {
+        return Weekday.allCases.map { $0.weekdayFullName }
     }
 
     @objc

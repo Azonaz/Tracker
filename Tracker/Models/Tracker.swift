@@ -6,4 +6,5 @@ struct Tracker {
     let color: UIColor
     let emodji: String
     let schedule: [Weekday]
+    let isPinned: Bool
 }

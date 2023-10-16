@@ -1,18 +1,18 @@
 import Foundation
 import CoreData
 
-struct TrackerStoreUpdate {
-    let insertedSections: IndexSet
-    let insertedIndexPaths: [IndexPath]
-}
-
 protocol TrackerStoreDelegate: AnyObject {
-    func didUpdate(_ update: TrackerStoreUpdate)
+    func didUpdate()
 }
 
 protocol TrackerStoreProtocol {
     func getTracker(_ trackerCD: TrackerCD) throws -> Tracker
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws
+    func deleteTracker(_ tracker: Tracker) throws
+    func fetchCategoryForTracker(with id: UUID) -> String
+    func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws
+    func pinTracker(_ tracker: Tracker) throws
+    func unpinTracker(_ tracker: Tracker) throws
 }
 
 final class TrackerStore: NSObject {
@@ -77,7 +77,8 @@ private extension TrackerStore {
                        title: title,
                        color: uiColorMarshalling.getColor(from: colorString),
                        emodji: emodji,
-                       schedule: scheduleString.components(separatedBy: ", ").compactMap { Weekday(rawValue: $0) })
+                       schedule: scheduleString.components(separatedBy: ", ").compactMap { Weekday(rawValue: $0) },
+                       isPinned: trackerCD.isPinned)
     }
 
     func addNewTrackerCoreData(_ tracker: Tracker, in category: TrackerCategory) throws {
@@ -91,6 +92,78 @@ private extension TrackerStore {
         trackerCD.category = trackerCategoryCD
         try context.save()
     }
+
+    func deleteSelectTracker(_ tracker: Tracker) throws {
+        let recordsRequest = NSFetchRequest<TrackerRecordCD>(entityName: "TrackerRecordCD")
+        recordsRequest.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        let deletedTracker = try context.fetch(recordsRequest)
+        deletedTracker.forEach { context.delete($0) }
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let deletesTrackers = try context.fetch(request)
+            deletesTrackers.forEach { context.delete($0) }
+            try context.save()
+        } catch {
+            throw StoreError.deleteError
+        }
+    }
+
+    func fetchCategoryForSelectTracker(with id: UUID) -> String {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+            request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
+            if let trackerCD = try? context.fetch(request).first {
+                return trackerCD.category?.title ?? ""
+            }
+            return ""
+    }
+
+    func editTrackerCoreData(_ tracker: Tracker, in category: TrackerCategory) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToEdit = trackers.first {
+                trackerToEdit.title = tracker.title
+                trackerToEdit.color = uiColorMarshalling.getHexString(from: tracker.color)
+                trackerToEdit.emodji = tracker.emodji
+                trackerToEdit.schedule = tracker.schedule.compactMap { $0.rawValue }.joined(separator: ", ")
+                let categoryCD = try trackerCategoryStore.fetchTrackerCategory(for: category)
+                trackerToEdit.category = categoryCD
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
+
+    func pinTrackerCoreData(_ tracker: Tracker) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToPin = trackers.first {
+                trackerToPin.isPinned = true
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
+
+    func unpinTrackerCoreData(_ tracker: Tracker) throws {
+        let request = NSFetchRequest<TrackerCD>(entityName: "TrackerCD")
+        request.predicate = NSPredicate(format: "id = %@", tracker.id as CVarArg)
+        do {
+            let trackers = try context.fetch(request)
+            if let trackerToUnpin = trackers.first {
+                trackerToUnpin.isPinned = false
+                try context.save()
+            }
+        } catch {
+            throw StoreError.decodingError
+        }
+    }
 }
 
 extension TrackerStore: TrackerStoreProtocol {
@@ -102,42 +175,30 @@ extension TrackerStore: TrackerStoreProtocol {
     func addTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
         try addNewTrackerCoreData(tracker, in: category)
     }
+
+    func deleteTracker(_ tracker: Tracker) throws {
+        try deleteSelectTracker(tracker)
+    }
+
+    func fetchCategoryForTracker(with id: UUID) -> String {
+        fetchCategoryForSelectTracker(with: id)
+    }
+
+    func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
+        try editTrackerCoreData(tracker, in: category)
+    }
+
+    func pinTracker(_ tracker: Tracker) throws {
+        try pinTrackerCoreData(tracker)
+    }
+
+    func unpinTracker(_ tracker: Tracker) throws {
+        try unpinTrackerCoreData(tracker)
+    }
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
-
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedSections.removeAll()
-        insertedIndexPaths.removeAll()
-    }
-
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.didUpdate(TrackerStoreUpdate(insertedSections: insertedSections,
-                                               insertedIndexPaths: insertedIndexPaths))
-        insertedSections.removeAll()
-        insertedIndexPaths.removeAll()
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType) {
-        switch type {
-        case .insert:
-            insertedSections.insert(sectionIndex)
-        default:
-            break
-        }
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any,
-                    at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let indexPath = newIndexPath {
-                insertedIndexPaths.append(indexPath)
-            }
-        default:
-            break
-        }
+        delegate?.didUpdate()
     }
 }
