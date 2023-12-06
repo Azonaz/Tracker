@@ -306,6 +306,7 @@
 		84E3A3192A73E3C400030BDF = {
 			isa = PBXGroup;
 			children = (
+				84DFF25A2B20BE310028553C /* readme.md */,
 				84E3A3242A73E3C400030BDF /* Tracker */,
 				84CEB7312AD7EBAF0076163B /* TrackerTests */,
 				84E3A3232A73E3C400030BDF /* Products */,
@@ -341,7 +342,6 @@
 				84E3A32E2A73E3C500030BDF /* Assets.xcassets */,
 				84E3A3302A73E3C500030BDF /* LaunchScreen.storyboard */,
 				84E3A3332A73E3C500030BDF /* Info.plist */,
-				84DFF25A2B20BE310028553C /* readme.md */,
 			);
 			path = Tracker;
 			sourceTree = "<group>";
