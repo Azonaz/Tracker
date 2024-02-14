@@ -4,7 +4,9 @@
 
 [Дизайн Figma](https://www.figma.com/file/owAO4CAPTJdpM1BZU5JHv7/Tracker-(YP)?t=SZDLmkWeOPX4y6mp-0)
 
-[Скринкаст](https://disk.yandex.ru/i/VMXcxgbuNOY36g)
+# Скринкаст
+
+![Tracker](https://github.com/Azonaz/Tracker/assets/125258194/d8e19c55-a2d6-4fb0-8094-3f8eba3b15b9)
 
 # Назначение и цели приложения
 
